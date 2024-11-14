@@ -1,7 +1,5 @@
-# web
-<<<<<<< HEAD
-The website interface for the Archie Bell project.
-=======
+
+# The website interface for the Archie Bell project.
 
 A new Flutter project.
 
