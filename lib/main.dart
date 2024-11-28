@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart'; // For kIsWeb
 import 'package:http/http.dart' as http;
 
 void main() {
@@ -34,20 +35,20 @@ class _FormPageState extends State<FormPage> {
   String? _firstName, _lastName;
   int? _age;
   String? _photoPath;
+  Uint8List? _photoBytes; // For web platform
 
   Future<void> _submitForm() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      if (_photoPath == null) {
+      if (_photoPath == null && _photoBytes == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please upload a photo.')),
+          const SnackBar(content: Text('Please upload a photo before submitting.')),
         );
         return;
       }
 
       try {
-        // Prepare the request
         final request = http.MultipartRequest(
           'POST',
           Uri.parse('http://localhost:3000/submit'), // Replace with your backend URL
@@ -56,25 +57,37 @@ class _FormPageState extends State<FormPage> {
         request.fields['firstName'] = _firstName!;
         request.fields['lastName'] = _lastName!;
         request.fields['age'] = _age.toString();
-        request.files.add(
-          await http.MultipartFile.fromPath('photo', _photoPath!),
-        );
 
-        // Send the request
+        if (kIsWeb) {
+          request.files.add(
+            http.MultipartFile.fromBytes('photo', _photoBytes!,
+                filename: 'uploaded_photo.jpg'), // File name for web
+          );
+        } else {
+          request.files.add(
+            await http.MultipartFile.fromPath('photo', _photoPath!),
+          );
+        }
+
         final response = await request.send();
 
         if (response.statusCode == 201) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Form Submitted Successfully!')),
           );
+          _formKey.currentState?.reset();
+          setState(() {
+            _photoPath = null;
+            _photoBytes = null;
+          });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Failed to submit the form.')),
+            SnackBar(content: Text('Submission failed with status code: ${response.statusCode}')),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('Error occurred: $e')),
         );
       }
     }
@@ -86,16 +99,32 @@ class _FormPageState extends State<FormPage> {
       allowedExtensions: ['jpg', 'jpeg'],
     );
 
-    if (result != null && result.files.single.path != null) {
-      final extension = result.files.single.extension?.toLowerCase();
-      if (extension == 'jpg' || extension == 'jpeg') {
-        setState(() {
-          _photoPath = result.files.single.path;
-        });
+    if (result != null) {
+      if (kIsWeb) {
+        // Handle web-specific case
+        final bytes = result.files.first.bytes;
+        if (bytes != null) {
+          setState(() {
+            _photoBytes = bytes;
+            _photoPath = result.files.first.name; // File name for display
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No file selected.')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please upload a valid JPEG photo.')),
-        );
+        // Handle mobile/desktop case
+        final filePath = result.files.single.path;
+        if (filePath != null && (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg'))) {
+          setState(() {
+            _photoPath = filePath;
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Please upload a valid JPEG photo.')),
+          );
+        }
       }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +137,7 @@ class _FormPageState extends State<FormPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Basic Form with Photo Upload')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
