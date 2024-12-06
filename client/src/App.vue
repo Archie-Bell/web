@@ -21,7 +21,7 @@
         <input type="text" name="lastLocationSeen" :bind="lastLocationSeen" id="lastLocationSeen" placeholder="Moose Jaw, SK" class="border rounded-lg p-2">
 
         <label for="name" class="mr-2 block content-center pt-2">Last Date & Time Seen</label>
-        <input type="datetime-local" name="lastDateTimeSeen" :bind="lastDateTimeSeen" id="lastDateTimeSeen" class="border rounded-lg p-2">
+        <input type="datetime-local" name="lastDateTimeSeen" :bind="lastDateTimeSeen" id="lastDateTimeSeen" placeholder="12:00 PM" class="border rounded-lg p-2">
       </div>
 
     </div>
