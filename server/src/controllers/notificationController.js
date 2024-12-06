@@ -41,6 +41,7 @@ const pushNotifications = async (req, res) => {
             notification: {
                 title: "Missing Person Alert",
                 body: name + ", aged " + age + ", has been reported missing just now, press this notification for more details.",
+                
             },
         };
 
