@@ -11,7 +11,7 @@ const db = admin.firestore();
 const pushNotifications = async (req, res) => {
     try {
         // Get the name of the missing person
-        const { name, age } = req.body;
+        const { name, age, id, lastLocationSeen, lastDateTimeSeen, additionalInfo } = req.body;
 
         // Fetch the FCM tokens from Firestore collection
         const tokensSnapshot = await db.collection('fcmTokens').get();
@@ -41,7 +41,14 @@ const pushNotifications = async (req, res) => {
             notification: {
                 title: "Missing Person Alert",
                 body: name + ", aged " + age + ", has been reported missing just now, press this notification for more details.",
-                
+            },
+            data: {
+                id: id,
+                name: name,
+                age: age,
+                lastLocationSeen: lastLocationSeen,
+                lastDateTimeSeen: lastDateTimeSeen,
+                additionalInfo: additionalInfo,
             },
         };
 
