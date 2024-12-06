@@ -1,3 +1,4 @@
 client/node_modules
 server/node_modules
 server/.env
+server/src/config/data/archie-bell-notif-system-firebase-adminsdk-cqr8e-b633275df3.json
