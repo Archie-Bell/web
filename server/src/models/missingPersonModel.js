@@ -6,6 +6,7 @@ const missingPersonSchema = mongoose.Schema({
     lastLocationSeen: { type: String, required: [true, 'The last known location of this person is required'] },
     lastDateTimeSeen: { type: String, required: [true, 'The last known date and time of this person is required'] },
     additionalInfo: { type: String, default: "" },
+    image: { type: String, required: [true, 'This person\'s image is required'] }
 },
 {
     collection: 'MissingPersonsList',

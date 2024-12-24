@@ -1,8 +1,10 @@
+const sharp = require('sharp');
+const rsg = require('random-string-generator');
 const MissingPerson = require('../models/missingPersonModel');
 
 const submitForm = async (req, res, next) => {
     try {
-        const { name, age, lastLocationSeen, lastDateTimeSeen, additionalInfo } = req.body;
+        const { name, age, lastLocationSeen, lastDateTimeSeen, additionalInfo, image } = req.body;
 
         // Switch case for validation
         switch (true) {
@@ -35,9 +37,27 @@ const submitForm = async (req, res, next) => {
                 return res.status(400).json({
                     message: 'The last known date and time of this person is required'
                 });
+            
+            // If image is not initialised
+            case (!image):
+                return res.status(400).json({
+                    message: 'This person\'s image is required'
+                });
         }
 
-        await MissingPerson.create({name, age, lastLocationSeen, lastDateTimeSeen, additionalInfo});
+        let imagePath = null;
+        if (image) {
+            const toBase64 = image.replace(/^data:image\/(png|jpg|jpeg);base64,/, '');
+            const outputPath = `uploads/${rsg()}${Date.now()}.jpg`;
+
+            await sharp(Buffer.from(toBase64, 'base64'))
+            .resize(200, 200, { fit: sharp.fit.cover, position: sharp.strategy.center })
+            .toFile(outputPath);
+
+            imagePath = outputPath;
+        }
+
+        await MissingPerson.create({ name, age, lastLocationSeen, lastDateTimeSeen, additionalInfo, image: imagePath });
         next();
 
     } catch (e) {
