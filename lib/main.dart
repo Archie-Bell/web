@@ -124,7 +124,7 @@ class _PublicSubmissionFormState extends State<PublicSubmissionForm> {
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Center(
-          child: Container(
+          child: SizedBox(
             width: MediaQuery.of(context).size.width * 0.8, // Adjust width to 80% of screen width
             child: Form(
               key: _formKey,
