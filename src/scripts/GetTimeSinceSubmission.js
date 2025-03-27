@@ -32,5 +32,24 @@ export default {
     
         const differenceInYears = Math.floor(differenceInMonths / 12);
         return `${differenceInYears} year${differenceInYears === 1 ? '' : 's'} ago`;
+    },
+
+    formatDateOfSubmission(date) {
+        const options = {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        };
+    
+        let formattedDate = new Date(date).toLocaleString('en-GB', options);
+    
+        formattedDate = formattedDate.replace(/([ap])m/i, (match) => match.toUpperCase());
+        formattedDate = formattedDate.replace(/(\w{3})(\s)/, '$1.$2');    
+        formattedDate = formattedDate.replace(/(\d{2}) (\w{3}\.) (\d{4}\,),/, '$1 $2 $3');
+    
+        return formattedDate;
     }
 }

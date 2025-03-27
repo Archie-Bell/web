@@ -35,14 +35,14 @@
                                 data.submission_date
                             )
                         "
+                        @click="passSelectedId(data._id)"
                     />
                 </div>
             </div>
 
             <!-- Right Panel -->
             <div class="ps-5 flex-[2]">
-                <RequestDetails
-                />
+                <RequestDetails :id="selectedId"/>
             </div>
         </div>
 
@@ -65,8 +65,16 @@ import GetTimeSinceSubmission from "@/scripts/GetTimeSinceSubmission.js";
 
 const isActiveSearchesDialogOpen = ref(false);
 const pendingList = ref([]);
+const selectedId = ref('');
 
 const router = useRouter();
+const emit = defineEmits();
+
+const passSelectedId = (id) => {
+    console.log(id);
+    selectedId.value = id;
+    emit('selected-id', id);
+}
 
 const fetchPendingList = async () => {
     try {
