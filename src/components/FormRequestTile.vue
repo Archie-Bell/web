@@ -1,30 +1,32 @@
 <template>
     <div class="form-request-tile" @click="handleClick">
-      <h3>{{ title }}</h3>
-      <p>Submitted by Jane Doe ## minutes ago.</p>
+        <h3>{{ name }}, {{ age }}</h3>
+        <p>Submitted by {{ reporter_legal_name }} {{ time_since_submission }}.</p>
+        <p>{{ id || 'ID not recognised.' }}</p>
     </div>
-  </template>
-  
-  <script setup>
-  const props = defineProps({
-    title: String,
-  });
-  
-  const emit = defineEmits(['select-request']);
-  
-  const handleClick = () => {
-    emit('select-request', props.title);
-  };
-  </script>
-  
- <style scoped>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+const fetchedId = ref('');
+
+const props = defineProps({
+    id: String,
+    name: String,
+    age: Number,
+    reporter_legal_name: String,
+    time_since_submission: String,
+});
+</script>
+
+<style scoped>
 .form-request-tile {
     border: 1px solid #ccc;
     padding: 10px;
     margin-bottom: 10px;
     cursor: pointer;
-    max-height: 150px; /* Set a max height for the tile */
-    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 150px;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
 }
@@ -41,5 +43,3 @@ p {
     color: #666;
 }
 </style>
-
-  

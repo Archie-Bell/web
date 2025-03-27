@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import AdminPanel from '@/views/AdminPanel.vue';
+import AdminPanel from '@/views/AdminPanelView.vue';
 import MainView from '@/views/MainView.vue';
 
 const routes = [
@@ -7,7 +7,7 @@ const routes = [
     { path: '/s/admin-panel', name: 'Archie Bell (Staff)', component: AdminPanel },
 
     {
-
+        
     }
 ];
 
