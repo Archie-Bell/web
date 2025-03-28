@@ -21,19 +21,41 @@
                         <p class="text-lg"><strong>Age:</strong> {{ age }}</p>
                         <p class="text-lg"><strong>Last known location:</strong> {{ last_location_seen }}</p>
                         <p class="text-lg"><strong>Last date/time seen:</strong> {{ last_date_time_seen }}</p>
-                        <p class="text-lg"><strong>Submitted At:</strong> {{ submission_date }}</p>
-                        <p class="text-lg"><strong>Last Updated At:</strong> {{ last_updated_date }}</p>
-                        <p class="text-lg"><strong>Additional Info:</strong></p>
+                        <p class="text-lg"><strong>Submitted at:</strong> {{ submission_date }}</p>
+                        <p class="text-lg"><strong>Last updated at:</strong> {{ last_updated_date }}</p>
+                        <p class="text-lg"><strong>Submission status:</strong> {{ form_status }}</p>
+                        <p class="text-lg"><strong>Additional info:</strong></p>
                         <p>{{ additional_info }}</p>
                     </div>
                 </div>
             </div>
+
+            <div v-else-if="currentTab === 1">
+                <div class="p-2 border rounded-xl">
+                    <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Missing Person Details</strong></p>
+                    <p class="text-m">- <strong>Name & age:</strong> {{ name }}, {{ age }}</p>
+                    <p class="text-m">- <strong>Last location & date:</strong> {{ last_location_seen }} ({{ last_date_time_seen }})</p>
+                    <p class="text-m">- <strong>Additional provided information:</strong></p>
+                    <p class="text-m">{{ additional_info }}</p>
+                </div>
+                <div class="p-2 mt-2 border rounded-xl">
+                    <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Reporter Information</strong></p>
+                    <p class="text-m">- <strong>Reporter's legal name:</strong> {{ reporter_legal_name }}</p>
+                    <p class="text-m">- <strong>Reporter's phone number:</strong> {{ reporter_phone_number }}</p>
+                    <p class="text-m">- <strong>Reporter's location:</strong> {{ last_location_seen }}</p>
+                    <p class="text-m">- <strong>Reporter's submission date:</strong> {{ submission_date }}</p>
+                    <p class="text-m">- <strong>Submission status:</strong> {{ form_status }}</p>
+                    <p v-if="form_status === 'Rejected'" class="text-m">- <strong>Rejection reason:</strong> {{ rejection_reason }}</p>
+                </div>
+            </div>
+
+            <div v-else-if="currentTab === 2"></div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, watch } from 'vue';
 import TabBar from "./TabBar.vue";
 import DataService from '@/services/DataService.js';
 import GetTimeSinceSubmission from '@/scripts/GetTimeSinceSubmission.js';
@@ -47,6 +69,11 @@ const last_date_time_seen = ref('');
 const additional_info = ref('');
 const submission_date = ref('');
 const last_updated_date = ref('');
+const reporter_legal_name = ref('');
+const reporter_phone_number = ref('');
+const form_status = ref('');
+const rejection_reason = ref('');
+
 const imageUrl = ref(''); // Ref to store the image URL
 
 // Use defineProps to get the id from the parent component
@@ -58,6 +85,7 @@ const props = defineProps({
 watch(() => props.id, (newId) => {
     idRef.value = newId;
     fetchSelectedDataContents(idRef.value);
+    currentTab.value = 0;
 });
 
 // Handle tab selection
@@ -80,7 +108,11 @@ const fetchSelectedDataContents = async (id) => {
         additional_info.value = response.additional_info;
         submission_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.submission_date);
         last_updated_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.last_updated_date);
-        
+        reporter_legal_name.value = response.reporter_legal_name;
+        reporter_phone_number.value = response.reporter_phone_number;
+        form_status.value = response.form_status;
+        rejection_reason.value = response.rejection_reason;
+
         // Set the image URL
         imageUrl.value = await fetchImageData(response.image_url);
     }
