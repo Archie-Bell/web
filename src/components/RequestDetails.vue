@@ -2,15 +2,18 @@
     <div class="pt-3">
         <h2 class="font-bold uppercase text-2xl">{{ name && age ? `${name}, ${age}` : 'No Person Selected' }}</h2>
 
-        <TabBar @selected-tab="tabSelectHandler" class="pb-5"/>
+        <!-- TabBar component with event listener for opening the approve modal -->
+        <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" class="pb-5"/>
+
         <div v-if="!idRef">
             <p>Select a form to view its details.</p>
         </div>
 
         <div v-else>
+            <!-- Overview Tab -->
             <div v-if="currentTab === 0">
                 <div class="grid grid-cols-3 gap-6">
-                    <div class="p-4 border rounded-xl">
+                    <div class="p-4 border rounded-xl content-center">
                         <!-- Using the ref for the image URL directly -->
                         <img :src="imageUrl" alt="Fetched Data Image" v-if="imageUrl" />
                         <p v-else>Loading image...</p>
@@ -30,6 +33,7 @@
                 </div>
             </div>
 
+            <!-- Contact Tab -->
             <div v-else-if="currentTab === 1">
                 <div class="p-2 border rounded-xl">
                     <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Missing Person Details</strong></p>
@@ -48,9 +52,22 @@
                     <p v-if="form_status === 'Rejected'" class="text-m">- <strong>Rejection reason:</strong> {{ rejection_reason }}</p>
                 </div>
             </div>
-
-            <div v-else-if="currentTab === 2"></div>
         </div>
+
+        <!-- Method to open Approve screen -->
+        <Teleport to="body">
+            <!-- The modal will only be shown if the flag isApproveDialogOpen is true -->
+            <ApproveDialog 
+                v-if="isApproveDialogOpen" 
+                :id="idRef" 
+                :name="name" 
+                :age="age" 
+                :reporter_legal_name="reporter_legal_name" 
+                :submission_date="submission_date"
+                :image_url="imageUrl"
+                @close="closeApproveDialog" 
+            />
+        </Teleport>
     </div>
 </template>
 
@@ -59,6 +76,7 @@ import { ref, watch } from 'vue';
 import TabBar from "./TabBar.vue";
 import DataService from '@/services/DataService.js';
 import GetTimeSinceSubmission from '@/scripts/GetTimeSinceSubmission.js';
+import ApproveDialog from './ApproveDialog.vue';
 
 // Initialize refs to store data
 const idRef = ref('');
@@ -132,4 +150,23 @@ const fetchImageData = async (image) => {
         return ''; // Return empty string or a fallback image in case of error
     }
 }
+
+// Modal control
+const isApproveDialogOpen = ref(false);
+const previousTab = ref(null);
+
+// Open ApproveDialog
+const openApproveDialog = () => {
+    console.log("Opening Approve Dialog");
+    if (idRef.value) {
+        previousTab.value = currentTab.value;
+        isApproveDialogOpen.value = true; // Open the modal
+    }
+};
+
+// Close ApproveDialog
+const closeApproveDialog = () => {
+    isApproveDialogOpen.value = false; // Close the modal
+    currentTab.value = previousTab.value; // Restore the previous tab
+};
 </script>

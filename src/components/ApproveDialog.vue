@@ -2,22 +2,39 @@
     <div class="modal-container" @click="handleClickOutside">
         <div class="modal p-5 rounded-2xl drop-shadow-xl content-center" @click.stop>
             <h2 class="font-bold text-2xl">Approve Submission?</h2>
-            
-            <div class="grid content-center">
-              <button @click="closeDialog" class="btn btn-red">Close</button>
+            <div class="grid grid-cols-3 gap-1 pt-1">
+                <div class="p-2 border rounded-xl cols-span-1 content-center">
+                    <img :src="image_url" alt="Fetched Data Image" v-if="image_url">
+                    <p v-else>Loading image...</p>
+                </div>
+                
+                <div class="p-2 border rounded-xl col-span-2">
+                    <p><strong>Submission ID:</strong> {{ id }}</p>
+                    <p><strong>Missing person:</strong> {{ name }}, {{ age }}</p>
+                    <p><strong>Submitted by:</strong> {{ reporter_legal_name }}</p>
+                    <p><strong>Submission date & time:</strong><br/> {{ submission_date }}</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-1 content-center pt-1">
+              <button @click="approveSubmission(props.id)" class="btn btn-green col-span-1">Approve</button>
+              <button @click="closeDialog" class="btn btn-red col-span-1">Cancel</button>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
-
 const emit = defineEmits(["close"]);
 
 const closeDialog = () => {
     emit("close");
 };
+
+const approveSubmission = (id) => {
+    console.log(id);
+    closeDialog();
+}
 
 // Function to handle clicks outside of the modal
 const handleClickOutside = (event) => {
@@ -26,6 +43,15 @@ const handleClickOutside = (event) => {
         closeDialog();
     }
 };
+
+const props = defineProps({
+    id: String,
+    name: String,
+    age: Number,
+    reporter_legal_name: String,
+    submission_date: String,
+    image_url: String,
+});
 </script>
 
 <style scoped>
