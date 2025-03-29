@@ -1,6 +1,6 @@
 <template>
     <div class="pt-3">
-        <h2 class="font-bold uppercase text-2xl">{{ name && age ? `${name}, ${age}` : 'No Person Selected' }}</h2>
+        <h2 class="font-bold uppercase text-2xl">{{ name && age ? `${name}, ${age} - Information Screen` : 'No Person Selected' }}</h2>
 
         <!-- TabBar component with event listener for opening the approve modal -->
         <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" class="pb-5"/>
@@ -11,11 +11,11 @@
 
         <div v-else>
             <!-- Overview Tab -->
-            <div v-if="currentTab === 0">
+            <div v-if="current_tab === 0">
                 <div class="grid grid-cols-3 gap-6">
                     <div class="p-4 border rounded-xl content-center">
                         <!-- Using the ref for the image URL directly -->
-                        <img :src="imageUrl" alt="Fetched Data Image" v-if="imageUrl" />
+                        <img :src="image_url" alt="Fetched Data Image" v-if="image_url" />
                         <p v-else>Loading image...</p>
                     </div>
 
@@ -34,7 +34,7 @@
             </div>
 
             <!-- Contact Tab -->
-            <div v-else-if="currentTab === 1">
+            <div v-else-if="current_tab === 1">
                 <div class="p-2 border rounded-xl">
                     <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Missing Person Details</strong></p>
                     <p class="text-m">- <strong>Name & age:</strong> {{ name }}, {{ age }}</p>
@@ -58,13 +58,13 @@
         <Teleport to="body">
             <!-- The modal will only be shown if the flag isApproveDialogOpen is true -->
             <ApproveDialog 
-                v-if="isApproveDialogOpen" 
+                v-if="is_approve_dialog_open" 
                 :id="idRef" 
                 :name="name" 
                 :age="age" 
                 :reporter_legal_name="reporter_legal_name" 
                 :submission_date="submission_date"
-                :image_url="imageUrl"
+                :image_url="image_url"
                 @close="closeApproveDialog" 
             />
         </Teleport>
@@ -92,7 +92,7 @@ const reporter_phone_number = ref('');
 const form_status = ref('');
 const rejection_reason = ref('');
 
-const imageUrl = ref(''); // Ref to store the image URL
+const image_url = ref(''); // Ref to store the image URL
 
 // Use defineProps to get the id from the parent component
 const props = defineProps({
@@ -103,14 +103,14 @@ const props = defineProps({
 watch(() => props.id, (newId) => {
     idRef.value = newId;
     fetchSelectedDataContents(idRef.value);
-    currentTab.value = 0;
+    current_tab.value = 0;
 });
 
 // Handle tab selection
-const currentTab = ref(0);
+const current_tab = ref(0);
 const tabSelectHandler = (val) => {
     console.log('Current Tab: ', val);
-    currentTab.value = val;
+    current_tab.value = val;
 }
 
 // Fetch the data based on the selected id
@@ -132,7 +132,7 @@ const fetchSelectedDataContents = async (id) => {
         rejection_reason.value = response.rejection_reason;
 
         // Set the image URL
-        imageUrl.value = await fetchImageData(response.image_url);
+        image_url.value = await fetchImageData(response.image_url);
     }
     catch (e) {
         console.error('Failed to fetch specified data:', e);
@@ -152,21 +152,21 @@ const fetchImageData = async (image) => {
 }
 
 // Modal control
-const isApproveDialogOpen = ref(false);
-const previousTab = ref(null);
+const is_approve_dialog_open = ref(false);
+const previous_tab = ref(null);
 
 // Open ApproveDialog
 const openApproveDialog = () => {
     console.log("Opening Approve Dialog");
     if (idRef.value) {
-        previousTab.value = currentTab.value;
-        isApproveDialogOpen.value = true; // Open the modal
+        previous_tab.value = current_tab.value;
+        is_approve_dialog_open.value = true; // Open the modal
     }
 };
 
 // Close ApproveDialog
 const closeApproveDialog = () => {
-    isApproveDialogOpen.value = false; // Close the modal
-    currentTab.value = previousTab.value; // Restore the previous tab
+    is_approve_dialog_open.value = false; // Close the modal
+    current_tab.value = previous_tab.value; // Restore the previous tab
 };
 </script>
