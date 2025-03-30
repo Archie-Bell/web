@@ -3,7 +3,7 @@
         <h2 class="font-bold uppercase text-2xl">{{ name && age ? `${name}, ${age} - Information Screen` : 'No Person Selected' }}</h2>
 
         <!-- TabBar component with event listener for opening the approve modal -->
-        <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" class="pb-5"/>
+        <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" @open-reject-dialog="openRejectDialog" class="pb-5"/>
         
         <div class="border rounded-xl p-2" style="min-height: 493px; height: 50vh">
             <div v-if="!idRef" class="flex items-center justify-center h-full">
@@ -69,6 +69,21 @@
                     @close="closeApproveDialog" 
                 />
             </Teleport>
+
+            <!-- Method to open Approve screen -->
+            <Teleport to="body">
+                <!-- The modal will only be shown if the flag isApproveDialogOpen is true -->
+                <RejectDialog 
+                    v-if="is_reject_dialog_open" 
+                    :id="idRef" 
+                    :name="name" 
+                    :age="age" 
+                    :reporter_legal_name="reporter_legal_name" 
+                    :submission_date="submission_date"
+                    :image_url="image_url"
+                    @close="closeRejectDialog" 
+                />
+            </Teleport>
         </div>
     </div>
 </template>
@@ -79,6 +94,7 @@ import TabBar from "./TabBar.vue";
 import DataService from '@/services/DataService.js';
 import GetTimeSinceSubmission from '@/scripts/GetTimeSinceSubmission.js';
 import ApproveDialog from './ApproveDialog.vue';
+import RejectDialog from './RejectDialog.vue';
 
 // Initialize refs to store data
 const idRef = ref('');
@@ -152,6 +168,7 @@ const fetchImageData = async (image) => {
 
 // Modal control
 const is_approve_dialog_open = ref(false);
+const is_reject_dialog_open = ref(false);
 const previous_tab = ref(null);
 
 // Open ApproveDialog
@@ -166,6 +183,21 @@ const openApproveDialog = () => {
 // Close ApproveDialog
 const closeApproveDialog = () => {
     is_approve_dialog_open.value = false; // Close the modal
+    current_tab.value = previous_tab.value; // Restore the previous tab
+};
+
+// Open RejectDialog
+const openRejectDialog = () => {
+    console.log("Opening Reject Dialog");
+    if (idRef.value) {
+        previous_tab.value = current_tab.value;
+        is_reject_dialog_open.value = true; // Open the modal
+    }
+};
+
+// Close RejectDialog
+const closeRejectDialog = () => {
+    is_reject_dialog_open.value = false; // Close the modal
     current_tab.value = previous_tab.value; // Restore the previous tab
 };
 </script>
