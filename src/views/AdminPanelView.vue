@@ -20,23 +20,25 @@
             <!-- Left Panel -->
             <div
                 class="pe-5 flex-[1] pt-3 overflow-y-auto"
-                style="max-height: 600px; flex-grow: 1"
+                style="min-height: 600px; max-height: 600px; flex-grow: 1"
             >
                 <h2 class="text-xl font-bold">Recent Form Requests</h2>
-                <div v-for="(data, index) in pendingList" :key="index">
-                    <FormRequestTile
-                        class="rounded-xl"
-                        :id="data._id"
-                        :name="data.name"
-                        :age="data.age"
-                        :reporter_legal_name="data.reporter_legal_name"
-                        :time_since_submission="
-                            GetTimeSinceSubmission.getTimeSinceSubmission(
-                                data.submission_date
-                            )
-                        "
-                        @click="passSelectedId(data._id)"
-                    />
+                <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
+                    <div v-for="(data, index) in pendingList" :key="index">
+                        <FormRequestTile
+                            class="rounded-xl"
+                            :id="data._id"
+                            :name="data.name"
+                            :age="data.age"
+                            :reporter_legal_name="data.reporter_legal_name"
+                            :time_since_submission="
+                                GetTimeSinceSubmission.getTimeSinceSubmission(
+                                    data.submission_date
+                                )
+                            "
+                            @click="passSelectedId(data._id)"
+                        />
+                    </div>
                 </div>
             </div>
 

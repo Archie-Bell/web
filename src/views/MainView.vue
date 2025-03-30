@@ -16,11 +16,10 @@ const reporter_phone_number = ref("(123) 456-7890");
 const submit = async () => {
     console.log("Submitting form...");
 
-    if (image_uri.value) {
-        console.log("Image to Base64: ", image_uri.value);
-    } else {
+    if (!image_uri.value) {
         console.log("No image was selected for submission");
     }
+
 
     try {
         const formData = new FormData();

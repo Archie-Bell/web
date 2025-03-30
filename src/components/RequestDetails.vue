@@ -4,70 +4,72 @@
 
         <!-- TabBar component with event listener for opening the approve modal -->
         <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" class="pb-5"/>
-
-        <div v-if="!idRef">
-            <p>Select a form to view its details.</p>
-        </div>
-
-        <div v-else>
-            <!-- Overview Tab -->
-            <div v-if="current_tab === 0">
-                <div class="grid grid-cols-3 gap-6">
-                    <div class="p-4 border rounded-xl content-center">
-                        <!-- Using the ref for the image URL directly -->
-                        <img :src="image_url" alt="Fetched Data Image" v-if="image_url" />
-                        <p v-else>Loading image...</p>
+        
+        <div class="border rounded-xl p-2" style="min-height: 493px;">
+            <div v-if="!idRef">
+                <p>Select a form to view its details.</p>
+            </div>
+    
+            <div v-else>
+                <!-- Overview Tab -->
+                <div v-if="current_tab === 0">
+                    <div class="grid grid-cols-3 gap-6">
+                        <div class="p-4 border rounded-xl content-center">
+                            <!-- Using the ref for the image URL directly -->
+                            <img :src="image_url" alt="Fetched Data Image" v-if="image_url" />
+                            <p v-else>Loading image...</p>
+                        </div>
+    
+                        <div class="p-4 col-span-2 border rounded-xl">
+                            <p class="text-lg"><strong>Name:</strong> {{ name }}</p>
+                            <p class="text-lg"><strong>Age:</strong> {{ age }}</p>
+                            <p class="text-lg"><strong>Last known location:</strong> {{ last_location_seen }}</p>
+                            <p class="text-lg"><strong>Last date/time seen:</strong> {{ last_date_time_seen }}</p>
+                            <p class="text-lg"><strong>Submitted at:</strong> {{ submission_date }}</p>
+                            <p class="text-lg"><strong>Last updated at:</strong> {{ last_updated_date }}</p>
+                            <p class="text-lg"><strong>Submission status:</strong> {{ form_status }}</p>
+                            <p class="text-lg"><strong>Additional info:</strong></p>
+                            <p>{{ additional_info }}</p>
+                        </div>
                     </div>
-
-                    <div class="p-4 col-span-2 border rounded-xl">
-                        <p class="text-lg"><strong>Name:</strong> {{ name }}</p>
-                        <p class="text-lg"><strong>Age:</strong> {{ age }}</p>
-                        <p class="text-lg"><strong>Last known location:</strong> {{ last_location_seen }}</p>
-                        <p class="text-lg"><strong>Last date/time seen:</strong> {{ last_date_time_seen }}</p>
-                        <p class="text-lg"><strong>Submitted at:</strong> {{ submission_date }}</p>
-                        <p class="text-lg"><strong>Last updated at:</strong> {{ last_updated_date }}</p>
-                        <p class="text-lg"><strong>Submission status:</strong> {{ form_status }}</p>
-                        <p class="text-lg"><strong>Additional info:</strong></p>
-                        <p>{{ additional_info }}</p>
+                </div>
+    
+                <!-- Contact Tab -->
+                <div v-else-if="current_tab === 1">
+                    <div class="p-2 border rounded-xl">
+                        <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Missing Person Details</strong></p>
+                        <p class="text-m">- <strong>Name & age:</strong> {{ name }}, {{ age }}</p>
+                        <p class="text-m">- <strong>Last location & date:</strong> {{ last_location_seen }} ({{ last_date_time_seen }})</p>
+                        <p class="text-m">- <strong>Additional provided information:</strong></p>
+                        <p class="text-m">{{ additional_info }}</p>
+                    </div>
+                    <div class="p-2 mt-2 border rounded-xl">
+                        <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Reporter Information</strong></p>
+                        <p class="text-m">- <strong>Reporter's legal name:</strong> {{ reporter_legal_name }}</p>
+                        <p class="text-m">- <strong>Reporter's phone number:</strong> {{ reporter_phone_number }}</p>
+                        <p class="text-m">- <strong>Reporter's location:</strong> {{ last_location_seen }}</p>
+                        <p class="text-m">- <strong>Reporter's submission date:</strong> {{ submission_date }}</p>
+                        <p class="text-m">- <strong>Submission status:</strong> {{ form_status }}</p>
+                        <p v-if="form_status === 'Rejected'" class="text-m">- <strong>Rejection reason:</strong> {{ rejection_reason }}</p>
                     </div>
                 </div>
             </div>
-
-            <!-- Contact Tab -->
-            <div v-else-if="current_tab === 1">
-                <div class="p-2 border rounded-xl">
-                    <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Missing Person Details</strong></p>
-                    <p class="text-m">- <strong>Name & age:</strong> {{ name }}, {{ age }}</p>
-                    <p class="text-m">- <strong>Last location & date:</strong> {{ last_location_seen }} ({{ last_date_time_seen }})</p>
-                    <p class="text-m">- <strong>Additional provided information:</strong></p>
-                    <p class="text-m">{{ additional_info }}</p>
-                </div>
-                <div class="p-2 mt-2 border rounded-xl">
-                    <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Reporter Information</strong></p>
-                    <p class="text-m">- <strong>Reporter's legal name:</strong> {{ reporter_legal_name }}</p>
-                    <p class="text-m">- <strong>Reporter's phone number:</strong> {{ reporter_phone_number }}</p>
-                    <p class="text-m">- <strong>Reporter's location:</strong> {{ last_location_seen }}</p>
-                    <p class="text-m">- <strong>Reporter's submission date:</strong> {{ submission_date }}</p>
-                    <p class="text-m">- <strong>Submission status:</strong> {{ form_status }}</p>
-                    <p v-if="form_status === 'Rejected'" class="text-m">- <strong>Rejection reason:</strong> {{ rejection_reason }}</p>
-                </div>
-            </div>
+    
+            <!-- Method to open Approve screen -->
+            <Teleport to="body">
+                <!-- The modal will only be shown if the flag isApproveDialogOpen is true -->
+                <ApproveDialog 
+                    v-if="is_approve_dialog_open" 
+                    :id="idRef" 
+                    :name="name" 
+                    :age="age" 
+                    :reporter_legal_name="reporter_legal_name" 
+                    :submission_date="submission_date"
+                    :image_url="image_url"
+                    @close="closeApproveDialog" 
+                />
+            </Teleport>
         </div>
-
-        <!-- Method to open Approve screen -->
-        <Teleport to="body">
-            <!-- The modal will only be shown if the flag isApproveDialogOpen is true -->
-            <ApproveDialog 
-                v-if="is_approve_dialog_open" 
-                :id="idRef" 
-                :name="name" 
-                :age="age" 
-                :reporter_legal_name="reporter_legal_name" 
-                :submission_date="submission_date"
-                :image_url="image_url"
-                @close="closeApproveDialog" 
-            />
-        </Teleport>
     </div>
 </template>
 
