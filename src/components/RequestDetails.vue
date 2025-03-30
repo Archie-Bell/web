@@ -5,8 +5,8 @@
         <!-- TabBar component with event listener for opening the approve modal -->
         <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" class="pb-5"/>
         
-        <div class="border rounded-xl p-2" style="min-height: 493px;">
-            <div v-if="!idRef">
+        <div class="border rounded-xl p-2" style="min-height: 493px; height: 50vh">
+            <div v-if="!idRef" class="flex items-center justify-center h-full">
                 <p>Select a form to view its details.</p>
             </div>
     
@@ -111,7 +111,6 @@ watch(() => props.id, (newId) => {
 // Handle tab selection
 const current_tab = ref(0);
 const tabSelectHandler = (val) => {
-    console.log('Current Tab: ', val);
     current_tab.value = val;
 }
 
@@ -119,7 +118,6 @@ const tabSelectHandler = (val) => {
 const fetchSelectedDataContents = async (id) => {
     try {
         const response = await DataService.fetchSingularData(id);
-        console.log(response);
 
         name.value = response.name;
         age.value = response.age;
@@ -144,7 +142,6 @@ const fetchSelectedDataContents = async (id) => {
 // Fetch image data from the API and return the URL
 const fetchImageData = async (image) => {
     try {
-        console.log(image);
         const data = await DataService.fetchImageData(image);
         return data; // Assuming this returns a valid URL for the image
     } catch (e) {

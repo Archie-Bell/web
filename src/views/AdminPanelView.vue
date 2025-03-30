@@ -53,6 +53,7 @@
                 v-if="isActiveSearchesDialogOpen"
                 @close="closeActiveSearchesDialog"
             />
+            <h2 class="pt-1"><strong>Currently logged in as:</strong> {{ staff_email }}</h2>
         </div>
     </div>
 </template>
@@ -65,6 +66,7 @@ import ActiveSearchesDialog from "@/components/ActiveSearchesDialog.vue";
 import { useRouter } from "vue-router";
 import DataService from "@/services/DataService";
 import GetTimeSinceSubmission from "@/scripts/GetTimeSinceSubmission.js";
+import AuthService from "@/services/AuthService";
 
 const isActiveSearchesDialogOpen = ref(false);
 const pendingList = ref([]);
@@ -74,7 +76,7 @@ const router = useRouter();
 const emit = defineEmits();
 
 const passSelectedId = (id) => {
-    console.log(id);
+    console.log('Currently selected ID:', id);
     selectedId.value = id;
     emit('selected-id', id);
 }
@@ -101,11 +103,21 @@ const closeActiveSearchesDialog = () => {
 // Logout logic (to be implemented)
 const logout = () => {
     console.log("Logging out...");
+    localStorage.removeItem('token');
     router.push("/");
 };
 
+const staff_email = ref(null);
+
+const fetchStaffDetails = async () => {
+    const data = await AuthService.verifyAuthentication(localStorage.getItem('token'));
+    console.log('Currently authenticated as:', data.staff_email);
+    staff_email.value = data.staff_email;
+}
+
 onMounted(() => {
     fetchPendingList();
+    fetchStaffDetails();
 });
 </script>
 
