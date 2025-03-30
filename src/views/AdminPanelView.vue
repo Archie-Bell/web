@@ -16,34 +16,33 @@
                 </div>
             </header>
 
-            <div class="flex flex-1 mt-5 w-full">
+            <div class="flex mt-5 w-full h-[600px]">
                 <!-- Left Panel -->
-                <div
-                    class="pe-5 flex-[1] pt-3 overflow-y-auto"
-                    style="min-height: 600px; max-height: 600px; flex-grow: 1"
-                >
+                <div class="pe-5 flex-[1] pt-3 overflow-y-auto flex flex-col" style="max-height: 600px; flex-grow: 1">
                     <h2 class="text-xl font-bold">Pending Form Requests</h2>
-                    <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                        <!-- Check if pendingList is empty and center the message -->
-                        <div v-if="pendingList.length === 0" class="text-center text-gray-500">
-                            No pending requests available.
+                    <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
+                        <!-- Container for checking if the list is empty -->
+                        <div v-if="pendingList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
+                            No requests available.
                         </div>
 
-                        <!-- Loop through pendingList if not empty -->
-                        <div v-for="(data, index) in pendingList" :key="index">
-                            <FormRequestTile
-                                class="rounded-xl"
-                                :id="data._id"
-                                :name="data.name"
-                                :age="data.age"
-                                :reporter_legal_name="data.reporter_legal_name"
-                                :time_since_submission="
-                                    GetTimeSinceSubmission.getTimeSinceSubmission(
-                                        data.submission_date
-                                    )
-                                "
-                                @click="passSelectedId(data._id)"
-                            />
+                        <!-- If there are items in pendingList, they will be displayed here -->
+                        <div v-else class="flex flex-col space-y-4">
+                            <div v-for="(data, index) in pendingList" :key="index">
+                                <FormRequestTile
+                                    class="rounded-xl"
+                                    :id="data._id"
+                                    :name="data.name"
+                                    :age="data.age"
+                                    :reporter_legal_name="data.reporter_legal_name"
+                                    :time_since_submission="
+                                        GetTimeSinceSubmission.getTimeSinceSubmission(
+                                            data.submission_date
+                                        )
+                                    "
+                                    @click="passSelectedId(data._id)"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
