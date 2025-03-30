@@ -16,6 +16,7 @@ export default {
             return response.data;
         } catch (error) {
             console.error("Failed to verify authentication:", error);
+            localStorage.removeItem('token');
             throw new Error("Authentication verification failed");
         }
     },

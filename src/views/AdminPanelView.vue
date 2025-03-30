@@ -27,7 +27,7 @@
                         </div>
 
                         <!-- If there are items in pendingList, they will be displayed here -->
-                        <div v-else class="flex flex-col space-y-4">
+                        <div v-else class="flex flex-col">
                             <div v-for="(data, index) in pendingList" :key="index">
                                 <FormRequestTile
                                     class="rounded-xl"
