@@ -18,11 +18,13 @@
 
             <div class="p-2 border rounded-xl mt-1">
                 <label for="rejection_reason" class="font-bold">Rejection reason:</label><br/>
-                <textarea name="rejection_reason" id="rejection_reason" class="w-full border rounded-xl p-2 mt-1 resize-none" rows="3" wrap="hard" maxlength="125" placeholder="Maximum 125 characters allowed."></textarea>
+                <textarea name="rejection_reason" v-model="rejection_reason" id="rejection_reason" class="w-full border rounded-xl p-2 mt-1 resize-none" rows="3" wrap="hard" maxlength="125" placeholder="Maximum 125 characters and minimum 20 characters allowed."></textarea>
             </div>
 
+            <p v-if="update_error" class="pt-1 text-red-600">{{ update_error }}</p>
+
             <div class="grid grid-cols-2 gap-1 content-center pt-1">
-              <button @click="rejectSubmission(props.id)" class="btn btn-red col-span-1">Reject</button>
+              <button @click="rejectSubmission(props.id, rejection_reason)" class="btn btn-red col-span-1">Reject</button>
               <button @click="closeDialog" class="btn btn-green col-span-1">Cancel</button>
             </div>
         </div>
@@ -30,15 +32,47 @@
 </template>
 
 <script setup>
+import FormService from '@/services/FormService';
+import { ref } from 'vue';
+const rejection_reason = ref('');
+const update_error = ref(null);
+
 const emit = defineEmits(["close"]);
 
 const closeDialog = () => {
     emit("close");
 };
 
-const rejectSubmission = (id) => {
-    console.log(id);
-    closeDialog();
+const rejectSubmission = async (id, rejection_reason) => {
+    try {
+        console.log('Attempting to reject submission:', id);
+        
+        if (!rejection_reason || rejection_reason.trim() || rejection_reason.trim().length < 20) {
+            console.error('Rejection reason is required, and it can not be empty. Ensure minimum character requirement of 20 is also met.')
+
+            if (!rejection_reason || rejection_reason.trim().length === 0) {
+                return update_error.value = 'This field is required.'
+            }
+
+            if (rejection_reason.trim().length < 20) {
+                return update_error.value = `Rejection reason length is insufficient: ${rejection_reason.trim().length}`
+            }
+        }
+
+        const data = {
+            'submission_id': id,
+            'status': 'Rejected',
+            'rejection_reason': rejection_reason,
+        }
+
+        await FormService.updateSubmission(data);
+        console.log('Submission successfully rejected:', id)
+        closeDialog();
+    }
+    
+    catch (e) {
+        console.error('Something went wrong:', e);
+    }
 }
 
 // Function to handle clicks outside of the modal
