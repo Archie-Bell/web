@@ -3,7 +3,19 @@ import API from '@/services/API.js';
 export default {
     async fetchPendingList() {
         try {
-            const response = await API.get('/api/missing-persons/pending');
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                console.error('No valid token found in local storage.');
+                return;
+            }
+
+            const response = await API.get('/api/missing-persons/pending', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            
             return response.data;
         }
 
@@ -15,7 +27,13 @@ export default {
 
     async fetchSingularData(id) {
         try {
-            const response = await API.get(`/api/missing-person/pending/${id}/`)
+            const token = localStorage.getItem('token');
+
+            const response = await API.get(`/api/missing-person/pending/${id}/`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             return response.data;
         }
 

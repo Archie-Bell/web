@@ -73,6 +73,7 @@ import DataService from "@/services/DataService";
 import GetTimeSinceSubmission from "@/scripts/GetTimeSinceSubmission.js";
 import AuthService from "@/services/AuthService";
 
+const error = ref(null);
 const isActiveSearchesDialogOpen = ref(false);
 const pendingList = ref([]);
 const selectedId = ref('');
@@ -91,7 +92,7 @@ const fetchPendingList = async () => {
         pendingList.value = await DataService.fetchPendingList();
     } catch (e) {
         error.value = "Failed to fetch list data.";
-        console.error(error);
+        console.error(error.value);
     }
 };
 
