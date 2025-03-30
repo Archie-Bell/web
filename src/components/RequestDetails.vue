@@ -3,7 +3,13 @@
         <h2 class="font-bold uppercase text-2xl">{{ name && age ? `${name}, ${age} - Information Screen` : 'No Person Selected' }}</h2>
 
         <!-- TabBar component with event listener for opening the approve modal -->
-        <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" @open-reject-dialog="openRejectDialog" class="pb-5"/>
+        <TabBar 
+            @selected-tab="tabSelectHandler" 
+            @open-approve-dialog="openApproveDialog" 
+            @open-reject-dialog="openRejectDialog" 
+            class="pb-5"
+            :disabled="!idRef"
+        />
         
         <div class="border rounded-xl p-2" style="min-height: 493px; height: 50vh">
             <div v-if="!idRef" class="flex items-center justify-center h-full text-gray-500">
