@@ -1,58 +1,59 @@
 <template>
-    <div class="p-10 grid h-screen">
-        <header>
-            <h1 class="font-bold uppercase text-3xl">Admin Panel</h1>
-            <div class="flex gap-1">
-                <button
-                    @click="showActiveSearches"
-                    class="btn btn-blue uppercase"
-                >
-                    Active Searches
-                </button>
-                <button @click="logout" class="btn btn-red uppercase">
-                    Logout
-                </button>
-            </div>
-        </header>
+    <div class="p-10 flex h-screen items-center justify-center">
+        <div class="w-full max-w-7xl">
+            <header class="text-start mb-5">
+                <h1 class="font-bold uppercase text-3xl">Admin Panel</h1>
+                <div class="flex gap-1 justify-start mt-4">
+                    <button
+                        @click="showActiveSearches"
+                        class="btn btn-blue uppercase"
+                    >
+                        Active Searches
+                    </button>
+                    <button @click="logout" class="btn btn-red uppercase">
+                        Logout
+                    </button>
+                </div>
+            </header>
 
-        <div class="flex flex-1 mt-5">
-            <!-- Make sure it takes up the full height and uses flexbox -->
-            <!-- Left Panel -->
-            <div
-                class="pe-5 flex-[1] pt-3 overflow-y-auto"
-                style="min-height: 600px; max-height: 600px; flex-grow: 1"
-            >
-                <h2 class="text-xl font-bold">Recent Form Requests</h2>
-                <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
-                    <div v-for="(data, index) in pendingList" :key="index">
-                        <FormRequestTile
-                            class="rounded-xl"
-                            :id="data._id"
-                            :name="data.name"
-                            :age="data.age"
-                            :reporter_legal_name="data.reporter_legal_name"
-                            :time_since_submission="
-                                GetTimeSinceSubmission.getTimeSinceSubmission(
-                                    data.submission_date
-                                )
-                            "
-                            @click="passSelectedId(data._id)"
-                        />
+            <div class="flex flex-1 mt-5 w-full">
+                <!-- Left Panel -->
+                <div
+                    class="pe-5 flex-[1] pt-3 overflow-y-auto"
+                    style="min-height: 600px; max-height: 600px; flex-grow: 1"
+                >
+                    <h2 class="text-xl font-bold">Recent Form Requests</h2>
+                    <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
+                        <div v-for="(data, index) in pendingList" :key="index">
+                            <FormRequestTile
+                                class="rounded-xl"
+                                :id="data._id"
+                                :name="data.name"
+                                :age="data.age"
+                                :reporter_legal_name="data.reporter_legal_name"
+                                :time_since_submission="
+                                    GetTimeSinceSubmission.getTimeSinceSubmission(
+                                        data.submission_date
+                                    )
+                                "
+                                @click="passSelectedId(data._id)"
+                            />
+                        </div>
                     </div>
+                </div>
+
+                <!-- Right Panel -->
+                <div class="ps-5 flex-[2]">
+                    <RequestDetails :id="selectedId"/>
                 </div>
             </div>
 
-            <!-- Right Panel -->
-            <div class="ps-5 flex-[2]">
-                <RequestDetails :id="selectedId"/>
-            </div>
+            <!-- Active Searches Dialog -->
+            <ActiveSearchesDialog
+                v-if="isActiveSearchesDialogOpen"
+                @close="closeActiveSearchesDialog"
+            />
         </div>
-
-        <!-- Active Searches Dialog -->
-        <ActiveSearchesDialog
-            v-if="isActiveSearchesDialogOpen"
-            @close="closeActiveSearchesDialog"
-        />
     </div>
 </template>
 
