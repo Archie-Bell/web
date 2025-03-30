@@ -22,8 +22,14 @@
                     class="pe-5 flex-[1] pt-3 overflow-y-auto"
                     style="min-height: 600px; max-height: 600px; flex-grow: 1"
                 >
-                    <h2 class="text-xl font-bold">Recent Form Requests</h2>
-                    <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
+                    <h2 class="text-xl font-bold">Pending Form Requests</h2>
+                    <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                        <!-- Check if pendingList is empty and center the message -->
+                        <div v-if="pendingList.length === 0" class="text-center text-gray-500">
+                            No pending requests available.
+                        </div>
+
+                        <!-- Loop through pendingList if not empty -->
                         <div v-for="(data, index) in pendingList" :key="index">
                             <FormRequestTile
                                 class="rounded-xl"
@@ -83,7 +89,7 @@ const passSelectedId = (id) => {
 
 const fetchPendingList = async () => {
     try {
-        pendingList.value = await DataService.fetchPublicList();
+        pendingList.value = await DataService.fetchPendingList();
     } catch (e) {
         error.value = "Failed to fetch list data.";
         console.error(error);

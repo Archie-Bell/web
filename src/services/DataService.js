@@ -1,9 +1,9 @@
 import API from '@/services/API.js';
 
 export default {
-    async fetchPublicList() {
+    async fetchPendingList() {
         try {
-            const response = await API.get('/api/missing-persons');
+            const response = await API.get('/api/missing-persons/pending');
             return response.data;
         }
 
@@ -15,7 +15,7 @@ export default {
 
     async fetchSingularData(id) {
         try {
-            const response = await API.get(`/api/missing-person/${id}/`)
+            const response = await API.get(`/api/missing-person/pending/${id}/`)
             return response.data;
         }
 

@@ -6,7 +6,7 @@
         <TabBar @selected-tab="tabSelectHandler" @open-approve-dialog="openApproveDialog" @open-reject-dialog="openRejectDialog" class="pb-5"/>
         
         <div class="border rounded-xl p-2" style="min-height: 493px; height: 50vh">
-            <div v-if="!idRef" class="flex items-center justify-center h-full">
+            <div v-if="!idRef" class="flex items-center justify-center h-full text-gray-500">
                 <p>Select a form to view its details.</p>
             </div>
     
