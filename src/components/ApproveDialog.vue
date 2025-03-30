@@ -25,15 +25,30 @@
 </template>
 
 <script setup>
+import FormService from '@/services/FormService';
 const emit = defineEmits(["close"]);
 
 const closeDialog = () => {
     emit("close");
 };
 
-const approveSubmission = (id) => {
-    console.log(id);
-    closeDialog();
+const approveSubmission = async (id) => {
+    try {
+        console.log('Attempting to approve submission:', id);
+
+        const data = {
+            'submission_id': id,
+            'status': 'Approved',
+        }
+
+        await FormService.updateSubmission(data);
+        console.log('Submission successfully approved:', id)
+        closeDialog();
+    }
+    
+    catch (e) {
+        console.error('Something went wrong:', e);
+    }
 }
 
 // Function to handle clicks outside of the modal
