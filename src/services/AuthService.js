@@ -1,4 +1,5 @@
 import API from '@/services/API.js';
+import router from '@/router';
 
 export default {
     // Log in an existing user
@@ -18,7 +19,7 @@ export default {
             console.error("Failed to verify authentication:", error);
             localStorage.removeItem('token');
 
-            this.$router.push('/s/login')
+            router.push('/s/login')
             throw new Error("Authentication verification failed");
         }
     },
