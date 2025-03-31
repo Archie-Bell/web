@@ -47,16 +47,14 @@ const rejectSubmission = async (id, rejection_reason) => {
     try {
         console.log('Attempting to reject submission:', id);
         
-        if (!rejection_reason || rejection_reason.trim() || rejection_reason.trim().length < 20) {
-            console.error('Rejection reason is required, and it can not be empty. Ensure minimum character requirement of 20 is also met.')
-
-            if (!rejection_reason || rejection_reason.trim().length === 0) {
-                return update_error.value = 'This field is required.'
-            }
-
-            if (rejection_reason.trim().length < 20) {
-                return update_error.value = `Rejection reason length is insufficient: ${rejection_reason.trim().length}`
-            }
+        if (!rejection_reason || rejection_reason.trim().length === 0) {
+            console.error('Rejection reason is required, and it can not be empty.')
+            return update_error.value = 'This field is required.'
+        }
+        
+        if (rejection_reason.trim().length < 20) {
+            console.error('Rejection reason must be at least 20 characters.');
+            return update_error.value = `Rejection reason length is insufficient: ${rejection_reason.trim().length}`
         }
 
         const data = {
