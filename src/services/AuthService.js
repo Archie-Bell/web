@@ -17,6 +17,8 @@ export default {
         } catch (error) {
             console.error("Failed to verify authentication:", error);
             localStorage.removeItem('token');
+
+            this.$router.push('/s/login')
             throw new Error("Authentication verification failed");
         }
     },

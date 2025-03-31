@@ -29,6 +29,14 @@ export default {
         try {
             const token = localStorage.getItem('token');
 
+            if (id === null) {
+                console.error('Returning as there\'s no submission ID specified.');
+
+                return {
+                    error: 'Returning as there\'s no submission ID specified.'
+                };
+            }
+
             const response = await API.get(`/api/missing-person/pending/${id}/`, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -53,8 +61,7 @@ export default {
             const imageUrl = URL.createObjectURL(blob);  // Create a URL for the image
             return imageUrl;
         } catch (e) {
-            console.error('Unable to fetch or display image: ', e);
-            throw e;
+            console.error('Unable to fetch or display image.');
         }
     },
 }

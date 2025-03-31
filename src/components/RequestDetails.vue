@@ -1,6 +1,6 @@
 <template>
     <div class="pt-3">
-        <h2 class="font-bold uppercase text-2xl">{{ name && age ? `${name}, ${age} - Information Screen` : 'No Person Selected' }}</h2>
+        <h2 class="font-bold uppercase text-2xl">{{ name && age && idRef ? `${name}, ${age} - Information Screen` : 'No Person Selected' }}</h2>
 
         <!-- TabBar component with event listener for opening the approve modal -->
         <TabBar 

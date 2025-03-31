@@ -44,7 +44,6 @@ const approveSubmission = async (id) => {
         await FormService.updateSubmission(data);
         console.log('Submission successfully approved:', id)
         closeDialog();
-        window.location.reload();
     }
     
     catch (e) {

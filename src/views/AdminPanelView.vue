@@ -64,7 +64,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import FormRequestTile from "@/components/FormRequestTile.vue";
 import RequestDetails from "@/components/RequestDetails.vue";
 import ActiveSearchesDialog from "@/components/ActiveSearchesDialog.vue";
@@ -76,7 +76,11 @@ import AuthService from "@/services/AuthService";
 const error = ref(null);
 const isActiveSearchesDialogOpen = ref(false);
 const pendingList = ref([]);
-const selectedId = ref('');
+const selectedId = ref(null);
+const messages = ref([]);
+const socketInstance = ref(null);
+const socketReconnectAttempts = ref(0); // Track reconnection attempts
+let reconnectTimeout = 1000; // Start with 1-second reconnection delay
 
 const router = useRouter();
 const emit = defineEmits();
@@ -121,9 +125,64 @@ const fetchStaffDetails = async () => {
     staff_email.value = data.staff_email;
 }
 
+// Send heartbeat to keep WebSocket connection alive
+const sendHeartbeat = () => {
+    if (socketInstance.value && socketInstance.value.readyState === WebSocket.OPEN) {
+        console.log('Sending heartbeat to keep the connection alive');
+        socketInstance.value.send(JSON.stringify({ type: 'ping' }));
+    }
+};
+
+const reconnectWebSocket = () => {
+    if (socketReconnectAttempts.value < 5) {
+        console.log(`Reconnecting to WebSocket... Attempt ${socketReconnectAttempts.value}`);
+        socketInstance.value = new WebSocket('ws://localhost:8000/ws/submission-updates/');
+        socketReconnectAttempts.value++;
+
+        reconnectTimeout *= 2;
+        setTimeout(reconnectWebSocket, reconnectTimeout);
+    } else {
+        console.error('Failed to reconnect to WebSocket after 5 attempts.');
+    }
+};
+
 onMounted(() => {
     fetchPendingList();
     fetchStaffDetails();
+
+    socketInstance.value = new WebSocket('ws://localhost:8000/ws/submission-updates/');
+
+    socketInstance.value.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log('WS:', data.message);
+        if (data.type === 'update') {
+            setTimeout(() => {
+                fetchPendingList();
+            }, 1000);
+            selectedId.value = null;
+        }
+    };
+
+    socketInstance.value.onopen = () => {
+        socketReconnectAttempts.value = 0;
+
+        setInterval(sendHeartbeat, 30000);
+    };
+
+    socketInstance.value.onclose = (event) => {
+        reconnectWebSocket();
+    };
+
+    socketInstance.value.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        socketInstance.value.close();
+    };
+});
+
+onBeforeUnmount(() => {
+    if (socketInstance.value) {
+        socketInstance.value.close();
+    }
 });
 </script>
 

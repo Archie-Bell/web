@@ -68,7 +68,6 @@ const rejectSubmission = async (id, rejection_reason) => {
         await FormService.updateSubmission(data);
         console.log('Submission successfully rejected:', id)
         closeDialog();
-        window.location.reload();
     }
     
     catch (e) {
