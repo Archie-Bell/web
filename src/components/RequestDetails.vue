@@ -121,12 +121,13 @@ const image_url = ref(''); // Ref to store the image URL
 // Use defineProps to get the id from the parent component
 const props = defineProps({
     id: String,
+    submission_type: String,
 });
 
 // Update the idRef whenever the id prop changes
 watch(() => props.id, (newId) => {
     idRef.value = newId;
-    fetchSelectedDataContents(idRef.value);
+    fetchSelectedDataContents(idRef.value, props.submission_type);
     current_tab.value = 0;
 });
 
@@ -137,9 +138,9 @@ const tabSelectHandler = (val) => {
 }
 
 // Fetch the data based on the selected id
-const fetchSelectedDataContents = async (id) => {
+const fetchSelectedDataContents = async (id, submission_type) => {
     try {
-        const response = await DataService.fetchSingularData(id);
+        const response = await DataService.fetchSingularData(id, submission_type);
 
         name.value = response.name;
         age.value = response.age;

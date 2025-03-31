@@ -57,36 +57,61 @@ export default {
         }
 
         catch (e) {
-            console.error('Unable to fetch pending list: ', e);
+            console.error('Unable to fetch rejected list: ', e);
             throw error;
         }
     },
 
-    async fetchSingularData(id) {
+    async fetchSingularData(id, submission_type) {
         try {
             const token = localStorage.getItem('token');
-
+    
             if (id === null) {
                 console.error('Returning as there\'s no submission ID specified.');
-
                 return {
                     error: 'Returning as there\'s no submission ID specified.'
                 };
             }
-
-            const response = await API.get(`/api/missing-person/pending/${id}/`, {
+    
+            const validStatuses = ['pending', 'approved', 'rejected'];
+            if (!validStatuses.includes(submission_type)) {
+                console.error('Invalid submission type provided.');
+                return {
+                    error: 'Invalid submission type provided.'
+                };
+            }
+    
+            let endpoint = '';
+            
+            switch (submission_type) {
+                case 'pending':
+                    endpoint = `/api/missing-person/pending/${id}/`;
+                    break;
+                case 'approved':
+                    endpoint = `/api/missing-person/${id}/`;
+                    break;
+                case 'rejected':
+                    endpoint = `/api/missing-person/rejected/${id}/`;
+                    break;
+                default:
+                    console.error('Invalid status.');
+                    return {
+                        error: 'Invalid status provided.'
+                    };
+            }
+    
+            const response = await API.get(endpoint, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
+    
             return response.data;
-        }
-
-        catch (e) {
-            console.error('Unable to fetch missing persons list: ', e);
+        } catch (e) {
+            console.error('Unable to fetch missing person data: ', e);
             throw e;
         }
-    },
+    },    
 
     async fetchImageData(val) {
         try {

@@ -13,13 +13,13 @@
                     </button>
                     <button
                         @click="filterRequests('approved')"
-                        class="btn btn-green uppercase"
+                        class="btn btn-blue uppercase"
                     >
                         Approved Submissions
                     </button>
                     <button
                         @click="filterRequests('rejected')"
-                        class="btn btn-red uppercase"
+                        class="btn btn-blue uppercase"
                     >
                         Rejected Submissions
                     </button>
@@ -62,7 +62,7 @@
 
                 <!-- Right Panel -->
                 <div class="ps-5 flex-[2]">
-                    <RequestDetails :id="selectedId"/>
+                    <RequestDetails :id="selectedId" :submission_type="requestType"/>
                 </div>
             </div>
 
@@ -115,7 +115,7 @@ const fetchRequests = async () => {
         pendingList.value = await DataService.fetchPendingList();
         approvedList.value = await DataService.fetchApprovedList();
         rejectedList.value = await DataService.fetchRejectedList();
-        filterRequests('pending');
+        filterRequests(requestType.value);
     } catch (e) {
         error.value = "Failed to fetch list data.";
         console.error(error.value);
