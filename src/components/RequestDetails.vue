@@ -1,6 +1,6 @@
 <template>
     <div class="pt-3">
-        <h2 class="font-bold uppercase text-2xl">{{ name && age && idRef ? `${name}, ${age} - Information Screen` : 'No Person Selected' }}</h2>
+        <h2 class="font-bold uppercase text-2xl">{{ idRef ? `${name} - Information Screen` : 'No Person Selected' }}</h2>
 
         <!-- TabBar component with event listener for opening the approve modal -->
         <TabBar 
@@ -115,6 +115,7 @@ const reporter_legal_name = ref('');
 const reporter_phone_number = ref('');
 const form_status = ref('');
 const rejection_reason = ref('');
+const updated_by = ref('');
 
 const image_url = ref(''); // Ref to store the image URL
 
@@ -142,22 +143,41 @@ const fetchSelectedDataContents = async (id, submission_type) => {
     try {
         const response = await DataService.fetchSingularData(id, submission_type);
 
-        name.value = response.name;
-        age.value = response.age;
-        last_location_seen.value = response.last_location_seen;
-        last_date_time_seen.value = response.last_date_time_seen;
-        additional_info.value = response.additional_info;
-        submission_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.submission_date);
-        last_updated_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.last_updated_date);
-        reporter_legal_name.value = response.reporter_legal_name;
-        reporter_phone_number.value = response.reporter_phone_number;
-        form_status.value = response.form_status;
-        rejection_reason.value = response.rejection_reason;
+        // Common fields for both pending and approved
+        if (submission_type !== 'rejected') {
+            name.value = response.name;
+            age.value = response.age;
+            last_location_seen.value = response.last_location_seen;
+            last_date_time_seen.value = response.last_date_time_seen;
+            additional_info.value = response.additional_info;
+            submission_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.submission_date);
+            last_updated_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.last_updated_date);
+            reporter_legal_name.value = response.reporter_legal_name;
+            reporter_phone_number.value = response.reporter_phone_number;
+            form_status.value = response.form_status;
 
-        // Set the image URL
+            if (submission_type === 'approved') {
+                updated_by.value = response.updated_by; // Correct assignment
+            }
+        } else {
+            // For rejected submission type, map fields accordingly
+            name.value = response.reported_missing_person; // Ensure this property exists in the response
+            age.value = null; // Age is not available in rejected submissions
+            last_location_seen.value = response.reported_missing_location;
+            last_date_time_seen.value = response.reported_date_time_missing;
+            additional_info.value = ''; // You can map additional info if available
+            submission_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.submission_date);
+            last_updated_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.last_updated_date);
+            reporter_legal_name.value = response.reporter_legal_name;
+            reporter_phone_number.value = response.reporter_phone_number;
+            form_status.value = response.form_status || "Pending"; // Default value for form status
+            rejection_reason.value = response.rejection_reason || "No reason provided";
+            updated_by.value = response.updated_by; // Correct assignment
+        }
+
+        // Set the image URL (this part remains common)
         image_url.value = await fetchImageData(response.image_url);
-    }
-    catch (e) {
+    } catch (e) {
         console.error('Failed to fetch specified data:', e);
     }
 }

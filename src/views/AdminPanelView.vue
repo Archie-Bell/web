@@ -45,7 +45,7 @@
                                 <FormRequestTile
                                     class="rounded-xl"
                                     :id="data._id"
-                                    :name="data.name"
+                                    :name="data.name || data.reported_missing_person"
                                     :age="data.age"
                                     :reporter_legal_name="data.reporter_legal_name"
                                     :time_since_submission="

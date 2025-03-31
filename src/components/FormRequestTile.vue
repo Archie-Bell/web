@@ -1,6 +1,6 @@
 <template>
     <div class="form-request-tile" @click="handleClick">
-        <h3>{{ name }}, {{ age }}</h3>
+        <h3>{{ age ? `${name}, ${age}` : `${name}`}}</h3>
         <p>Submitted by {{ reporter_legal_name }} {{ time_since_submission }}.</p>
         <p>{{ 'Submission ID: ' + id || 'ID not recognised.' }}</p>
     </div>
