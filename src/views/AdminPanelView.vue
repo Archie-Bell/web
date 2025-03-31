@@ -159,7 +159,13 @@ onMounted(() => {
             setTimeout(() => {
                 fetchPendingList();
             }, 1000);
+        }
+
+        if (data.type === 'transaction') {
             selectedId.value = null;
+            setTimeout(() => {
+                fetchPendingList();
+            }, 1000);
         }
     };
 
