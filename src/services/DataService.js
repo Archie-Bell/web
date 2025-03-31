@@ -20,7 +20,44 @@ export default {
         }
 
         catch (e) {
+            console.error('Unable to fetch pending list: ', e);
+            throw error;
+        }
+    },
+
+    async fetchApprovedList() {
+        try {
+            const response = await API.get('/api/missing-persons/')
+            
+            return response.data;
+        }
+
+        catch (e) {
             console.error('Unable to fetch missing persons list: ', e);
+            throw error;
+        }
+    },
+
+    async fetchRejectedList() {
+        try {
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                console.error('No valid token found in local storage.');
+                return;
+            }
+
+            const response = await API.get('/api/missing-persons/rejected', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            
+            return response.data;
+        }
+
+        catch (e) {
+            console.error('Unable to fetch pending list: ', e);
             throw error;
         }
     },

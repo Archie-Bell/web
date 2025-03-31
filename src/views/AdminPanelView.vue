@@ -4,11 +4,24 @@
             <header class="text-start mb-5">
                 <h1 class="font-bold uppercase text-3xl">Admin Panel</h1>
                 <div class="flex gap-1 justify-start mt-4">
+                    <!-- Buttons to filter different submission statuses -->
                     <button
-                        @click="showActiveSearches"
+                        @click="filterRequests('pending')"
                         class="btn btn-blue uppercase"
                     >
-                        Active Searches
+                        Pending Form Requests
+                    </button>
+                    <button
+                        @click="filterRequests('approved')"
+                        class="btn btn-green uppercase"
+                    >
+                        Approved Submissions
+                    </button>
+                    <button
+                        @click="filterRequests('rejected')"
+                        class="btn btn-red uppercase"
+                    >
+                        Rejected Submissions
                     </button>
                     <button @click="logout" class="btn btn-red uppercase">
                         Logout
@@ -19,16 +32,16 @@
             <div class="flex mt-5 w-full h-[600px]">
                 <!-- Left Panel -->
                 <div class="pe-5 flex-[1] pt-3 overflow-y-auto flex flex-col" style="max-height: 600px; flex-grow: 1">
-                    <h2 class="text-xl font-bold">Pending Form Requests</h2>
+                    <h2 class="text-xl font-bold">{{ requestType === 'pending' ? 'Pending Form Requests' : requestType === 'approved' ? 'Approved Submissions' : 'Rejected Submissions' }}</h2>
                     <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
                         <!-- Container for checking if the list is empty -->
-                        <div v-if="pendingList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
+                        <div v-if="filteredList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
                             No requests available.
                         </div>
 
-                        <!-- If there are items in pendingList, they will be displayed here -->
+                        <!-- If there are items in filteredList, they will be displayed here -->
                         <div v-else class="flex flex-col">
-                            <div v-for="(data, index) in pendingList" :key="index">
+                            <div v-for="(data, index) in filteredList" :key="index">
                                 <FormRequestTile
                                     class="rounded-xl"
                                     :id="data._id"
@@ -76,11 +89,16 @@ import AuthService from "@/services/AuthService";
 const error = ref(null);
 const isActiveSearchesDialogOpen = ref(false);
 const pendingList = ref([]);
+const approvedList = ref([]);
+const rejectedList = ref([]);
+const filteredList = ref([]); // The list that is displayed based on the selected filter
 const selectedId = ref(null);
 const messages = ref([]);
 const socketInstance = ref(null);
 const socketReconnectAttempts = ref(0); // Track reconnection attempts
 let reconnectTimeout = 1000; // Start with 1-second reconnection delay
+
+const requestType = ref('pending');
 
 const router = useRouter();
 const emit = defineEmits();
@@ -91,12 +109,28 @@ const passSelectedId = (id) => {
     emit('selected-id', id);
 }
 
-const fetchPendingList = async () => {
+// Fetch pending, approved, and rejected form requests
+const fetchRequests = async () => {
     try {
         pendingList.value = await DataService.fetchPendingList();
+        approvedList.value = await DataService.fetchApprovedList();
+        rejectedList.value = await DataService.fetchRejectedList();
+        filterRequests('pending');
     } catch (e) {
         error.value = "Failed to fetch list data.";
         console.error(error.value);
+    }
+};
+
+// Set filtered list based on the selected request type (pending, approved, rejected)
+const filterRequests = (type) => {
+    requestType.value = type;
+    if (type === 'pending') {
+        filteredList.value = pendingList.value;
+    } else if (type === 'approved') {
+        filteredList.value = approvedList.value;
+    } else if (type === 'rejected') {
+        filteredList.value = rejectedList.value;
     }
 };
 
@@ -147,7 +181,7 @@ const reconnectWebSocket = () => {
 };
 
 onMounted(() => {
-    fetchPendingList();
+    fetchRequests();
     fetchStaffDetails();
 
     socketInstance.value = new WebSocket('ws://localhost:8000/ws/submission-updates/');
@@ -157,14 +191,14 @@ onMounted(() => {
         console.log('WS:', data.message);
         if (data.type === 'update') {
             setTimeout(() => {
-                fetchPendingList();
+                fetchRequests();
             }, 1000);
         }
 
         if (data.type === 'transaction') {
             selectedId.value = null;
             setTimeout(() => {
-                fetchPendingList();
+                fetchRequests();
             }, 1000);
         }
     };
