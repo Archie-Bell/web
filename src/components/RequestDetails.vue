@@ -9,9 +9,10 @@
             @open-reject-dialog="openRejectDialog" 
             class="pb-5"
             :disabled="!idRef"
+            :form-status="submission_type"
         />
         
-        <div class="border rounded-xl p-2" style="min-height: 493px; height: 50vh">
+        <div class="border rounded-xl p-2" style="min-height: 493px; height: 40vh">
             <div v-if="!idRef" class="flex items-center justify-center h-full text-gray-500">
                 <p>Select a form to view its details.</p>
             </div>
@@ -20,43 +21,51 @@
                 <!-- Overview Tab -->
                 <div v-if="current_tab === 0">
                     <div class="grid grid-cols-3 gap-6">
-                        <div class="p-4 border rounded-xl content-center">
+                        <div v-if="form_status === 'Pending' || form_status === 'Approved'" class="p-4 border rounded-xl content-center">
                             <!-- Using the ref for the image URL directly -->
                             <img :src="image_url" alt="Fetched Data Image" v-if="image_url" />
                             <p v-else>Loading image...</p>
                         </div>
-    
-                        <div class="p-4 col-span-2 border rounded-xl">
-                            <p class="text-lg"><strong>Name:</strong> {{ name }}</p>
-                            <p class="text-lg"><strong>Age:</strong> {{ age }}</p>
-                            <p class="text-lg"><strong>Last known location:</strong> {{ last_location_seen }}</p>
-                            <p class="text-lg"><strong>Last date/time seen:</strong> {{ last_date_time_seen }}</p>
+
+                        <!-- Conditionally apply col-span based on form_status -->
+                        <div :class="form_status === 'Rejected' ? 'p-4 col-span-3 border rounded-xl min-h-[29.7rem] max-h-[29.7rem] flex flex-col justify-between' : 'p-4 col-span-2 border rounded-xl min-h-[29.7rem] max-h-[29.7rem] flex flex-col justify-between'">
+                            <p class="text-lg"><strong>{{ form_status !== 'Rejected' ? 'Name' : 'Reported missing person' }}:</strong> {{ name }}</p>
+                            <p class="text-lg" v-if="form_status !== 'Rejected'"><strong>Age:</strong> {{ age }}</p>
+                            <p class="text-lg"><strong>{{ form_status !== 'Rejected' ? 'Last known location' : 'Reported missing location' }}:</strong> {{ last_location_seen }}</p>
+                            <p class="text-lg"><strong>{{ form_status !== 'Rejected' ? 'Last date/time seen' : 'Reported date/time missing' }}:</strong> {{ last_location_seen }}</p>
                             <p class="text-lg"><strong>Submitted at:</strong> {{ submission_date }}</p>
                             <p class="text-lg"><strong>Last updated at:</strong> {{ last_updated_date }}</p>
                             <p class="text-lg"><strong>Submission status:</strong> {{ form_status }}</p>
-                            <p class="text-lg"><strong>Additional info:</strong></p>
-                            <p>{{ additional_info }}</p>
+                            <p class="text-lg" v-if="form_status !== 'Rejected'"><strong>Additional info:</strong></p>
+                            <p class="text-lg" v-else><strong>Rejection reason:</strong></p>
+                            <p class="break-all" v-if="form_status !== 'Rejected'">{{ additional_info }}</p>
+                            <p class="break-all" v-else>{{ rejection_reason }}</p>
+                            <p class="text-lg" v-if="form_status !== 'Pending'"><strong>Updated by:</strong> {{ updated_by }}</p>
                         </div>
                     </div>
                 </div>
     
                 <!-- Contact Tab -->
                 <div v-else-if="current_tab === 1">
-                    <div class="p-2 border rounded-xl">
+                    <div class="p-2 border rounded-xl min-h-[12.1rem]">
                         <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Missing Person Details</strong></p>
-                        <p class="text-m">- <strong>Name & age:</strong> {{ name }}, {{ age }}</p>
-                        <p class="text-m">- <strong>Last location & date:</strong> {{ last_location_seen }} ({{ last_date_time_seen }})</p>
-                        <p class="text-m">- <strong>Additional provided information:</strong></p>
-                        <p class="text-m">{{ additional_info }}</p>
+                        <p class="text-m">- <strong>{{ form_status !== 'Rejected' ? 'Name & age' : 'Reported missing person'}}:</strong> {{ form_status !== 'Rejected' ? `${name}, ${age}` : name }}</p>
+                        <p class="text-m">- <strong>{{ form_status !== 'Rejected' ? 'Last location & date' : 'Reported missing location'}}:</strong> {{ form_status !== 'Rejected' ? `${last_location_seen} (${last_date_time_seen})` : last_location_seen }}</p>
+                        <p class="text-m" v-if="form_status === 'Rejected'">- <strong>Reported date/time missing:</strong> {{ last_date_time_seen }}</p>
+                        <p class="text-m" v-if="form_status !== 'Rejected'">- <strong>Additional provided information:</strong></p>
+                        <p v-if="form_status === 'Rejected' ">- <strong>Last updated date:</strong> {{ last_updated_date }}</p>
+                        <p class="text-m break-all">{{ additional_info }}</p>
                     </div>
-                    <div class="p-2 mt-2 border rounded-xl">
+                    <div class="p-2 mt-2 border rounded-xl min-h-[17.1rem]">
                         <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Reporter Information</strong></p>
                         <p class="text-m">- <strong>Reporter's legal name:</strong> {{ reporter_legal_name }}</p>
                         <p class="text-m">- <strong>Reporter's phone number:</strong> {{ reporter_phone_number }}</p>
                         <p class="text-m">- <strong>Reporter's location:</strong> {{ last_location_seen }}</p>
                         <p class="text-m">- <strong>Reporter's submission date:</strong> {{ submission_date }}</p>
                         <p class="text-m">- <strong>Submission status:</strong> {{ form_status }}</p>
-                        <p v-if="form_status === 'Rejected'" class="text-m">- <strong>Rejection reason:</strong> {{ rejection_reason }}</p>
+                        <p v-if="form_status === 'Rejected'" class="text-m break-all">- <strong>Rejection reason:</strong><br/>{{ rejection_reason }}</p>
+                        <p v-if="form_status !== 'Pending'">- <strong>Updated by:</strong> {{ updated_by }}</p>
+                        <p v-if="form_status === 'Approved' ">- <strong>Last updated date:</strong> {{ last_updated_date }}</p>
                     </div>
                 </div>
             </div>
@@ -176,20 +185,27 @@ const fetchSelectedDataContents = async (id, submission_type) => {
         }
 
         // Set the image URL (this part remains common)
-        image_url.value = await fetchImageData(response.image_url);
+        image_url.value = await fetchImageData(response.image_url, form_status.value);
     } catch (e) {
         console.error('Failed to fetch specified data:', e);
     }
 }
 
 // Fetch image data from the API and return the URL
-const fetchImageData = async (image) => {
-    try {
-        const data = await DataService.fetchImageData(image);
-        return data; // Assuming this returns a valid URL for the image
-    } catch (e) {
-        console.error('Error fetching image data:', e);
-        return ''; // Return empty string or a fallback image in case of error
+const fetchImageData = async (image, form_status) => {
+    if (form_status !== 'Rejected') {
+        try {
+            const data = await DataService.fetchImageData(image);
+            return data; // Assuming this returns a valid URL for the image
+        } catch (e) {
+            console.error('Error fetching image data:', e);
+            return ''; // Return empty string or a fallback image in case of error
+        }
+    }
+
+    else {
+        console.log('Image fetching not required as Rejected forms do not store images.')
+        return '';
     }
 }
 

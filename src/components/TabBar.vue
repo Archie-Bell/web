@@ -22,7 +22,10 @@
         >
             Contact
         </button>
+        
+        <!-- Show Approve and Reject buttons only for Pending status -->
         <button 
+            v-if="formStatus === 'pending'"
             @click="openApproveDialog" 
             :disabled="disabled"
             :class="{
@@ -34,6 +37,7 @@
             Approve
         </button>
         <button 
+            v-if="formStatus === 'pending'"
             @click="openRejectDialog" 
             :disabled="disabled"
             :class="{
@@ -52,6 +56,10 @@ const props = defineProps({
   disabled: {
     type: Boolean,
     default: false,
+  },
+  formStatus: {  // Add the formStatus prop
+    type: String,
+    default: 'pending',
   }
 });
 

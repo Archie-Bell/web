@@ -1,45 +1,32 @@
 <template>
     <div class="p-10 flex h-screen items-center justify-center">
         <div class="w-full max-w-7xl">
+            <!-- Header Section -->
             <header class="text-start mb-5">
                 <h1 class="font-bold uppercase text-3xl">Admin Panel</h1>
                 <div class="flex gap-1 justify-start mt-4">
                     <!-- Buttons to filter different submission statuses -->
-                    <button
-                        @click="filterRequests('pending')"
-                        class="btn btn-blue uppercase"
-                    >
-                        Pending Form Requests
-                    </button>
-                    <button
-                        @click="filterRequests('approved')"
-                        class="btn btn-blue uppercase"
-                    >
-                        Approved Submissions
-                    </button>
-                    <button
-                        @click="filterRequests('rejected')"
-                        class="btn btn-blue uppercase"
-                    >
-                        Rejected Submissions
-                    </button>
-                    <button @click="logout" class="btn btn-red uppercase">
-                        Logout
-                    </button>
+                    <button @click="filterRequests('pending')" class="btn btn-blue uppercase">Pending</button>
+                    <button @click="filterRequests('approved')" class="btn btn-blue uppercase">Approved</button>
+                    <button @click="filterRequests('rejected')" class="btn btn-blue uppercase">Rejected</button>
+                    <button @click="logout" class="btn btn-red uppercase">Logout</button>
                 </div>
             </header>
 
+            <!-- Main Content Section -->
             <div class="flex mt-5 w-full h-[600px]">
                 <!-- Left Panel -->
                 <div class="pe-5 flex-[1] pt-3 overflow-y-auto flex flex-col" style="max-height: 600px; flex-grow: 1">
-                    <h2 class="text-xl font-bold">{{ requestType === 'pending' ? 'Pending Form Requests' : requestType === 'approved' ? 'Approved Submissions' : 'Rejected Submissions' }}</h2>
+                    <h2 class="text-xl font-bold">
+                        {{ currentSubmissionPanel === 'pending' ? 'Pending Submissions' : currentSubmissionPanel === 'approved' ? 'Approved Submissions' : 'Rejected Submissions' }}
+                    </h2>
                     <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
-                        <!-- Container for checking if the list is empty -->
+                        <!-- No items message -->
                         <div v-if="filteredList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
                             No requests available.
                         </div>
 
-                        <!-- If there are items in filteredList, they will be displayed here -->
+                        <!-- Displaying filtered list of submissions -->
                         <div v-else class="flex flex-col">
                             <div v-for="(data, index) in filteredList" :key="index">
                                 <FormRequestTile
@@ -48,12 +35,8 @@
                                     :name="data.name || data.reported_missing_person"
                                     :age="data.age"
                                     :reporter_legal_name="data.reporter_legal_name"
-                                    :time_since_submission="
-                                        GetTimeSinceSubmission.getTimeSinceSubmission(
-                                            data.submission_date
-                                        )
-                                    "
-                                    @click="passSelectedId(data._id)"
+                                    :time_since_submission="GetTimeSinceSubmission.getTimeSinceSubmission(data.submission_date)"
+                                    @click="passSelectedId(data._id, data.form_status)"
                                 />
                             </div>
                         </div>
@@ -62,15 +45,14 @@
 
                 <!-- Right Panel -->
                 <div class="ps-5 flex-[2]">
-                    <RequestDetails :id="selectedId" :submission_type="requestType"/>
+                    <RequestDetails :id="selectedId" :submission_type="requestType" />
                 </div>
             </div>
 
             <!-- Active Searches Dialog -->
-            <ActiveSearchesDialog
-                v-if="isActiveSearchesDialogOpen"
-                @close="closeActiveSearchesDialog"
-            />
+            <ActiveSearchesDialog v-if="isActiveSearchesDialogOpen" @close="closeActiveSearchesDialog" />
+
+            <!-- Currently logged in as -->
             <h2 class="pt-1"><strong>Currently logged in as:</strong> {{ staff_email }}</h2>
         </div>
     </div>
@@ -78,38 +60,44 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import { useRouter } from "vue-router";
 import FormRequestTile from "@/components/FormRequestTile.vue";
 import RequestDetails from "@/components/RequestDetails.vue";
 import ActiveSearchesDialog from "@/components/ActiveSearchesDialog.vue";
-import { useRouter } from "vue-router";
 import DataService from "@/services/DataService";
 import GetTimeSinceSubmission from "@/scripts/GetTimeSinceSubmission.js";
 import AuthService from "@/services/AuthService";
 
+// State variables
 const error = ref(null);
 const isActiveSearchesDialogOpen = ref(false);
 const pendingList = ref([]);
 const approvedList = ref([]);
 const rejectedList = ref([]);
-const filteredList = ref([]); // The list that is displayed based on the selected filter
+const filteredList = ref([]); // List based on the selected filter
 const selectedId = ref(null);
-const messages = ref([]);
+const requestType = ref('pending'); // The selected request type (pending, approved, rejected)
+const currentSubmissionPanel = ref('pending');
+const staff_email = ref(null);
+
+// WebSocket state
 const socketInstance = ref(null);
-const socketReconnectAttempts = ref(0); // Track reconnection attempts
-let reconnectTimeout = 1000; // Start with 1-second reconnection delay
+const socketReconnectAttempts = ref(0);
+let reconnectTimeout = 1000; // Initial reconnect delay
 
-const requestType = ref('pending');
-
+// Router instance
 const router = useRouter();
+
+// Emit function (for emitting events to parent)
 const emit = defineEmits();
 
-const passSelectedId = (id) => {
-    console.log('Currently selected ID:', id);
+// Method to pass selected ID to the parent
+const passSelectedId = (id, submission_type) => {
+    requestType.value = submission_type.toLowerCase();
     selectedId.value = id;
-    emit('selected-id', id);
-}
+};
 
-// Fetch pending, approved, and rejected form requests
+// Fetch the list of requests (pending, approved, rejected)
 const fetchRequests = async () => {
     try {
         pendingList.value = await DataService.fetchPendingList();
@@ -122,9 +110,9 @@ const fetchRequests = async () => {
     }
 };
 
-// Set filtered list based on the selected request type (pending, approved, rejected)
+// Filter requests based on the selected request type
 const filterRequests = (type) => {
-    requestType.value = type;
+    currentSubmissionPanel.value = type;
     if (type === 'pending') {
         filteredList.value = pendingList.value;
     } else if (type === 'approved') {
@@ -134,32 +122,30 @@ const filterRequests = (type) => {
     }
 };
 
-// Show Active Searches dialog
+// Method to show Active Searches Dialog
 const showActiveSearches = () => {
     isActiveSearchesDialogOpen.value = true;
 };
 
-// Close Active Searches dialog
+// Method to close Active Searches Dialog
 const closeActiveSearchesDialog = () => {
     isActiveSearchesDialogOpen.value = false;
 };
 
-// Logout logic (to be implemented)
+// Logout functionality
 const logout = () => {
     console.log("Logging out...");
     localStorage.removeItem('token');
     router.push("/");
 };
 
-const staff_email = ref(null);
-
+// Fetch staff details after login
 const fetchStaffDetails = async () => {
     const data = await AuthService.verifyAuthentication(localStorage.getItem('token'));
-    console.log('Currently authenticated as:', data.staff_email);
     staff_email.value = data.staff_email;
-}
+};
 
-// Send heartbeat to keep WebSocket connection alive
+// WebSocket logic to maintain connection
 const sendHeartbeat = () => {
     if (socketInstance.value && socketInstance.value.readyState === WebSocket.OPEN) {
         console.log('Sending heartbeat to keep the connection alive');
@@ -167,6 +153,7 @@ const sendHeartbeat = () => {
     }
 };
 
+// WebSocket reconnection logic
 const reconnectWebSocket = () => {
     if (socketReconnectAttempts.value < 5) {
         console.log(`Reconnecting to WebSocket... Attempt ${socketReconnectAttempts.value}`);
@@ -180,6 +167,7 @@ const reconnectWebSocket = () => {
     }
 };
 
+// WebSocket message handling
 onMounted(() => {
     fetchRequests();
     fetchStaffDetails();
@@ -205,11 +193,10 @@ onMounted(() => {
 
     socketInstance.value.onopen = () => {
         socketReconnectAttempts.value = 0;
-
         setInterval(sendHeartbeat, 30000);
     };
 
-    socketInstance.value.onclose = (event) => {
+    socketInstance.value.onclose = () => {
         reconnectWebSocket();
     };
 
@@ -219,6 +206,7 @@ onMounted(() => {
     };
 });
 
+// Cleanup on component unmount
 onBeforeUnmount(() => {
     if (socketInstance.value) {
         socketInstance.value.close();
@@ -227,7 +215,7 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-/* Make sure the container takes up full height */
+/* Layout Styles */
 .grid {
     display: grid;
     grid-template-rows: auto 1fr; /* Header and content */
