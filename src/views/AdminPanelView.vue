@@ -45,7 +45,7 @@
 
                 <!-- Right Panel -->
                 <div class="ps-5 flex-[2]">
-                    <RequestDetails :id="selectedId" :submission_type="requestType" :socketInstance="socketInstance" />
+                    <RequestDetails :id="selectedId" :submission_type="requestType" :socketInstance="socketInstanceActiveSearch" />
                 </div>
             </div>
 
@@ -81,7 +81,8 @@ const currentSubmissionPanel = ref('pending');
 const staff_email = ref(null);
 
 // WebSocket state
-const socketInstance = ref(null);
+const socketInstanceSubmission = ref(null); // WebSocket instance for submission updates
+const socketInstanceActiveSearch = ref(null); // WebSocket instance for active search updates
 const socketReconnectAttempts = ref(0);
 let reconnectTimeout = 1000; // Initial reconnect delay
 
@@ -135,73 +136,99 @@ const fetchStaffDetails = async () => {
     staff_email.value = data.staff_email;
 };
 
-// WebSocket logic to maintain connection
-const sendHeartbeat = () => {
-    if (socketInstance.value && socketInstance.value.readyState === WebSocket.OPEN) {
-        console.log('Sending heartbeat to keep the connection alive');
-        socketInstance.value.send(JSON.stringify({ type: 'ping' }));
+// WebSocket logic for Submission Updates
+const handleSubmissionUpdates = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('Submission WS:', data.message);
+    if (data.type === 'update') {
+        setTimeout(() => {
+            console.log('Submission Update triggered');
+            fetchRequests();
+        }, 1000);
     }
-};
 
-// WebSocket reconnection logic
-const reconnectWebSocket = () => {
-    if (socketReconnectAttempts.value < 5) {
-        console.log(`Reconnecting to WebSocket... Attempt ${socketReconnectAttempts.value}`);
-        socketInstance.value = new WebSocket('ws://localhost:8000/ws/submission-updates/');
-        socketReconnectAttempts.value++;
-
-        reconnectTimeout *= 2;
-        setTimeout(reconnectWebSocket, reconnectTimeout);
-    } else {
-        console.error('Failed to reconnect to WebSocket after 5 attempts.');
-    }
-};
-
-// WebSocket message handling
-onMounted(() => {
-    fetchRequests();
-    fetchStaffDetails();
-
-    socketInstance.value = new WebSocket('ws://localhost:8000/ws/submission-updates/');
-
-    socketInstance.value.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log('WS:', data.message);
-        console.log('WS: Data Type:', data.type)
-        if (data.type === 'update') {
-            setTimeout(() => {
-                console.log('Update triggered')
-                fetchRequests();
-            }, 1000);
-        }
-
-        if (data.type === 'transaction') {
+    if (data.type === 'transaction') {
             selectedId.value = null;
             setTimeout(() => {
                 fetchRequests();
             }, 1000);
-        }
-    };
+    }
+};
 
-    socketInstance.value.onopen = () => {
+// WebSocket logic for Active Search Updates
+const handleActiveSearchUpdates = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('Active Search WS:', data.message);
+    // Handle Active Search updates here
+};
+
+// WebSocket reconnection logic
+const reconnectWebSocket = (socketType) => {
+    if (socketReconnectAttempts.value < 5) {
+        console.log(`Reconnecting to ${socketType} WebSocket... Attempt ${socketReconnectAttempts.value}`);
+        const socketInstance = socketType === 'submission' ? socketInstanceSubmission : socketInstanceActiveSearch;
+        socketInstance.value = new WebSocket(socketType === 'submission' ? 'ws://localhost:8000/ws/submission-updates/' : 'ws://localhost:8000/ws/active-search-updates/');
+        socketReconnectAttempts.value++;
+
+        reconnectTimeout *= 2;
+        setTimeout(() => reconnectWebSocket(socketType), reconnectTimeout);
+    } else {
+        console.error(`Failed to reconnect to ${socketType} WebSocket after 5 attempts.`);
+    }
+};
+
+// WebSocket connection and message handling
+onMounted(() => {
+    fetchRequests();
+    fetchStaffDetails();
+
+    // WebSocket for submission updates
+    socketInstanceSubmission.value = new WebSocket('ws://localhost:8000/ws/submission-updates/');
+    socketInstanceSubmission.value.onmessage = handleSubmissionUpdates;
+    socketInstanceSubmission.value.onopen = () => {
         socketReconnectAttempts.value = 0;
-        setInterval(sendHeartbeat, 30000);
+        setInterval(() => sendHeartbeat('submission'), 30000);
+    };
+    socketInstanceSubmission.value.onclose = () => {
+        reconnectWebSocket('submission');
+    };
+    socketInstanceSubmission.value.onerror = (error) => {
+        console.error('Submission WebSocket error:', error);
+        socketInstanceSubmission.value.close();
     };
 
-    socketInstance.value.onclose = () => {
-        reconnectWebSocket();
+    // WebSocket for active search updates
+    socketInstanceActiveSearch.value = new WebSocket('ws://localhost:8000/ws/active-search-updates/');
+    socketInstanceActiveSearch.value.onmessage = handleActiveSearchUpdates;
+    socketInstanceActiveSearch.value.onopen = () => {
+        socketReconnectAttempts.value = 0;
+        setInterval(() => sendHeartbeat('active-search'), 30000);
     };
-
-    socketInstance.value.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        socketInstance.value.close();
+    socketInstanceActiveSearch.value.onclose = () => {
+        reconnectWebSocket('active-search');
+    };
+    socketInstanceActiveSearch.value.onerror = (error) => {
+        console.error('Active Search WebSocket error:', error);
+        socketInstanceActiveSearch.value.close();
     };
 });
 
+// Send heartbeat to keep both WebSocket connections alive
+const sendHeartbeat = (socketType) => {
+    const socketInstance = socketType === 'submission' ? socketInstanceSubmission : socketInstanceActiveSearch;
+    if (socketInstance.value && socketInstance.value.readyState === WebSocket.OPEN) {
+        console.log(`Sending heartbeat to ${socketType} WebSocket`);
+        socketInstance.value.send(JSON.stringify({ type: 'ping' }));
+    }
+};
+
 // Cleanup on component unmount
 onBeforeUnmount(() => {
-    if (socketInstance.value) {
-        socketInstance.value.close();
+    if (socketInstanceSubmission.value) {
+        socketInstanceSubmission.value.close();
+    }
+    if (socketInstanceActiveSearch.value) {
+        socketInstanceActiveSearch.value.close();
     }
 });
 </script>

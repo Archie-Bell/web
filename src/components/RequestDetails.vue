@@ -179,6 +179,8 @@ const props = defineProps({
     socketInstance: WebSocket,
 });
 
+socketInstance.value = props.socketInstance;
+
 // Update the idRef whenever the id prop changes
 watch(() => props.id, (newId) => {
     idRef.value = newId;
@@ -335,21 +337,6 @@ const fetchFoundSubmissions = async (id, val) => {
 }
 
 onMounted(() => {
-    setTimeout(() => {
-        socketInstance.value = props.socketInstance;
-        socketInstance.value.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            console.log('WS:', data.message);
-            if (data.type === 'found_update') {
-                setTimeout(() => {
-                    if (foundSubmissionList.value) { // Check if the foundSubmissionList is available
-                        fetchFoundSubmissions(idRef.value, current_found_person_tab.value);
-                    } else {
-                        console.warn('foundSubmissionList is not initialized yet.');
-                    }
-                }, 1000);
-            }
-        };
-    }, 1000);
-});
+    
+})
 </script>
