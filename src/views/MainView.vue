@@ -20,7 +20,6 @@ const submit = async () => {
         console.log("No image was selected for submission");
     }
 
-
     try {
         const formData = new FormData();
         formData.append("name", name.value);

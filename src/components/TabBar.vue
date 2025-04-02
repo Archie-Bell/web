@@ -48,6 +48,19 @@
         >
             Reject
         </button>
+
+        <button
+            v-if="formStatus === 'approved'"
+            :disabled="disabled"
+            @click="selectedTab(2)"
+            :class="{
+                'bg-blue-500 text-white hover:bg-blue-400': !disabled,
+                'bg-gray-300 text-gray-500 cursor-not-allowed': disabled
+            }"
+            class="px-4 py-2 rounded-md transition-colors duration-200 font-bold"
+        >
+            Submissions
+        </button>
     </div>
 </template>
 

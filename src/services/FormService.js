@@ -19,4 +19,19 @@ export default {
             }
         });
     },
+
+    updateFoundSubmission(data) {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            console.error('No valid token found in local storage.');
+            return;
+        }
+
+        return API.post('/api/staff/missing-person/update/', data, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    }
 }

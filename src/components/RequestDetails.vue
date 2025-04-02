@@ -1,5 +1,5 @@
 <template>
-    <div class="pt-3">
+    <div>
         <h2 class="font-bold uppercase text-2xl">{{ idRef ? `${name} - Information Screen` : 'No Person Selected' }}</h2>
 
         <!-- TabBar component with event listener for opening the approve modal -->
@@ -12,7 +12,7 @@
             :form-status="submission_type"
         />
         
-        <div class="border rounded-xl p-2" style="min-height: 493px; height: 40vh">
+        <div class="border rounded-xl p-2" style="min-height: 507px; height: 40vh">
             <div v-if="!idRef" class="flex items-center justify-center h-full text-gray-500">
                 <p>Select a form to view its details.</p>
             </div>
@@ -23,12 +23,12 @@
                     <div class="grid grid-cols-3 gap-6">
                         <div v-if="form_status === 'Pending' || form_status === 'Approved'" class="p-4 border rounded-xl content-center">
                             <!-- Using the ref for the image URL directly -->
-                            <img :src="image_url" alt="Fetched Data Image" v-if="image_url" />
+                            <img :src="image_url" class="rounded-xl" alt="Fetched Data Image" v-if="image_url" />
                             <p v-else>Loading image...</p>
                         </div>
 
                         <!-- Conditionally apply col-span based on form_status -->
-                        <div :class="form_status === 'Rejected' ? 'p-4 col-span-3 border rounded-xl min-h-[29.7rem] max-h-[29.7rem] flex flex-col justify-between' : 'p-4 col-span-2 border rounded-xl min-h-[29.7rem] max-h-[29.7rem] flex flex-col justify-between'">
+                        <div :class="form_status === 'Rejected' ? 'p-4 col-span-3 border rounded-xl min-h-[30.6rem] max-h-[30.6rem] flex flex-col justify-between' : 'p-4 col-span-2 border rounded-xl min-h-[30.6rem] max-h-[30.6rem] flex flex-col justify-between'">
                             <p class="text-lg"><strong>{{ form_status !== 'Rejected' ? 'Name' : 'Reported missing person' }}:</strong> {{ name }}</p>
                             <p class="text-lg" v-if="form_status !== 'Rejected'"><strong>Age:</strong> {{ age }}</p>
                             <p class="text-lg"><strong>{{ form_status !== 'Rejected' ? 'Last known location' : 'Reported missing location' }}:</strong> {{ last_location_seen }}</p>
@@ -56,7 +56,7 @@
                         <p v-if="form_status === 'Rejected' ">- <strong>Last updated date:</strong> {{ last_updated_date }}</p>
                         <p class="text-m break-all">{{ additional_info }}</p>
                     </div>
-                    <div class="p-2 mt-2 border rounded-xl min-h-[17.1rem]">
+                    <div class="p-2 mt-2 border rounded-xl min-h-[18rem]">
                         <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Reporter Information</strong></p>
                         <p class="text-m">- <strong>Reporter's legal name:</strong> {{ reporter_legal_name }}</p>
                         <p class="text-m">- <strong>Reporter's phone number:</strong> {{ reporter_phone_number }}</p>
@@ -66,6 +66,35 @@
                         <p v-if="form_status === 'Rejected'" class="text-m break-all">- <strong>Rejection reason:</strong><br/>{{ rejection_reason }}</p>
                         <p v-if="form_status !== 'Pending'">- <strong>Updated by:</strong> {{ updated_by }}</p>
                         <p v-if="form_status === 'Approved' ">- <strong>Last updated date:</strong> {{ last_updated_date }}</p>
+                    </div>
+                </div>
+
+                <div v-else-if="current_tab === 2">
+                    <h2 class="text-lg font-bold border-b">Found Person Submissions</h2>
+                    <span>
+                        <button class="btn btn-blue mt-1" @click="fetchFoundSubmissions(idRef, 0)">Pending</button>
+                        <button class="btn btn-blue mt-1 ms-1" @click="fetchFoundSubmissions(idRef, 1)">Rejected</button>
+                    </span>
+                    <div class="flex-[1] p-2 mt-2 border rounded-xl min-h-[25.5rem] max-h-[25.5rem] overflow-y-auto">
+                        <!-- No items message -->
+                        <div v-if="foundSubmissionList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
+                            No requests available.
+                        </div>
+
+                        <!-- Displaying filtered list of submissions -->
+                        <div v-else class="flex flex-col">
+                            <div v-for="(data, index) in foundSubmissionList" :key="index">
+                                <FoundSubmissionTile
+                                    class="rounded-xl"
+                                    :index="index + 1"
+                                    :id="data._id"
+                                    :submission_status="data.submission_status"
+                                    :time_since_submission="GetTimeSinceSubmission.getTimeSinceSubmission(data.last_updated_date)"
+                                    :rejection_reason="data.rejection_reason"
+                                    @open-review-dialog="openReviewDialog($event)"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -99,17 +128,29 @@
                     @close="closeRejectDialog" 
                 />
             </Teleport>
+
+            <Teleport to="body">
+                <ReviewFoundDialog
+                    v-if="is_review_dialog_open"
+                    @close="closeReviewDialog"
+                    :id="submission_id"
+                    :parent_id="parent_id"
+                >
+                </ReviewFoundDialog>
+            </Teleport>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import TabBar from "./TabBar.vue";
 import DataService from '@/services/DataService.js';
 import GetTimeSinceSubmission from '@/scripts/GetTimeSinceSubmission.js';
 import ApproveDialog from './ApproveDialog.vue';
 import RejectDialog from './RejectDialog.vue';
+import FoundSubmissionTile from './FoundSubmissionTile.vue';
+import ReviewFoundDialog from './ReviewFoundDialog.vue';
 
 // Initialize refs to store data
 const idRef = ref('');
@@ -125,13 +166,17 @@ const reporter_phone_number = ref('');
 const form_status = ref('');
 const rejection_reason = ref('');
 const updated_by = ref('');
+const foundSubmissionList = ref([]);
 
 const image_url = ref(''); // Ref to store the image URL
+
+const socketInstance = ref(null);
 
 // Use defineProps to get the id from the parent component
 const props = defineProps({
     id: String,
     submission_type: String,
+    socketInstance: WebSocket,
 });
 
 // Update the idRef whenever the id prop changes
@@ -142,10 +187,17 @@ watch(() => props.id, (newId) => {
 });
 
 // Handle tab selection
+const current_found_person_tab = ref(0);
 const current_tab = ref(0);
 const tabSelectHandler = (val) => {
     current_tab.value = val;
 }
+
+watch(() => current_tab.value, (newTab) => {
+    if (newTab === 2 && idRef.value) {
+        fetchFoundSubmissions(idRef.value, 0);
+    }
+});
 
 // Fetch the data based on the selected id
 const fetchSelectedDataContents = async (id, submission_type) => {
@@ -212,7 +264,21 @@ const fetchImageData = async (image, form_status) => {
 // Modal control
 const is_approve_dialog_open = ref(false);
 const is_reject_dialog_open = ref(false);
+const is_review_dialog_open = ref(false);
+const submission_id = ref(null);
+const parent_id = ref(null);
 const previous_tab = ref(null);
+
+
+const openReviewDialog = (id) => {
+    is_review_dialog_open.value = true;
+    submission_id.value = id;
+    parent_id.value = idRef.value;
+};
+
+const closeReviewDialog = () => {
+    is_review_dialog_open.value = false;
+};
 
 // Open ApproveDialog
 const openApproveDialog = () => {
@@ -243,4 +309,47 @@ const closeRejectDialog = () => {
     is_reject_dialog_open.value = false; // Close the modal
     current_tab.value = previous_tab.value; // Restore the previous tab
 };
+
+const fetchFoundSubmissions = async (id, val) => {
+    try {
+        console.log('Fetching found submissions')
+        console.log('ID:', id)
+
+        current_found_person_tab.value = val;
+
+        if (current_found_person_tab.value === 0) {
+            const response = await DataService.fetchPersonFoundSubmissions(id);
+            foundSubmissionList.value = response;
+            return;
+        }
+
+        if (current_found_person_tab.value === 1) {
+            const response = await DataService.fetchRejectedPersonFoundSubmissions(id);
+            foundSubmissionList.value = response;
+            return;
+        }
+        console.log(foundSubmissionList.value);
+    } catch (e) {
+        console.error('Unable to fetch found submission data:', e)
+    }
+}
+
+onMounted(() => {
+    setTimeout(() => {
+        socketInstance.value = props.socketInstance;
+        socketInstance.value.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('WS:', data.message);
+            if (data.type === 'found_update') {
+                setTimeout(() => {
+                    if (foundSubmissionList.value) { // Check if the foundSubmissionList is available
+                        fetchFoundSubmissions(idRef.value, current_found_person_tab.value);
+                    } else {
+                        console.warn('foundSubmissionList is not initialized yet.');
+                    }
+                }, 1000);
+            }
+        };
+    }, 1000);
+});
 </script>

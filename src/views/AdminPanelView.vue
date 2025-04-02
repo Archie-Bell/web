@@ -14,13 +14,13 @@
             </header>
 
             <!-- Main Content Section -->
+            <h2 class="text-xl font-bold">
+                {{ currentSubmissionPanel === 'pending' ? 'Pending Submissions' : currentSubmissionPanel === 'approved' ? 'Approved Submissions' : 'Rejected Submissions' }}
+            </h2>
             <div class="flex mt-5 w-full h-[600px]">
                 <!-- Left Panel -->
-                <div class="pe-5 flex-[1] pt-3 overflow-y-auto flex flex-col" style="max-height: 600px; flex-grow: 1">
-                    <h2 class="text-xl font-bold">
-                        {{ currentSubmissionPanel === 'pending' ? 'Pending Submissions' : currentSubmissionPanel === 'approved' ? 'Approved Submissions' : 'Rejected Submissions' }}
-                    </h2>
-                    <div class="rounded-xl border p-2" style="min-height: 558px; max-height: 558px;">
+                <div class="pe-5 flex-[1] pt-3 overflow-y-auto flex flex-col rounded-xl border p-2" style="max-height: 600px; flex-grow: 1">
+                    <div class="" style="min-height: 558px; max-height: 558px;">
                         <!-- No items message -->
                         <div v-if="filteredList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
                             No requests available.
@@ -45,7 +45,7 @@
 
                 <!-- Right Panel -->
                 <div class="ps-5 flex-[2]">
-                    <RequestDetails :id="selectedId" :submission_type="requestType" />
+                    <RequestDetails :id="selectedId" :submission_type="requestType" :socketInstance="socketInstance" />
                 </div>
             </div>
 
@@ -63,7 +63,7 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import FormRequestTile from "@/components/FormRequestTile.vue";
 import RequestDetails from "@/components/RequestDetails.vue";
-import ActiveSearchesDialog from "@/components/ActiveSearchesDialog.vue";
+import ActiveSearchesDialog from "@/components/ReviewFoundDialog.vue";
 import DataService from "@/services/DataService";
 import GetTimeSinceSubmission from "@/scripts/GetTimeSinceSubmission.js";
 import AuthService from "@/services/AuthService";
@@ -122,16 +122,6 @@ const filterRequests = (type) => {
     }
 };
 
-// Method to show Active Searches Dialog
-const showActiveSearches = () => {
-    isActiveSearchesDialogOpen.value = true;
-};
-
-// Method to close Active Searches Dialog
-const closeActiveSearchesDialog = () => {
-    isActiveSearchesDialogOpen.value = false;
-};
-
 // Logout functionality
 const logout = () => {
     console.log("Logging out...");
@@ -177,8 +167,10 @@ onMounted(() => {
     socketInstance.value.onmessage = (event) => {
         const data = JSON.parse(event.data);
         console.log('WS:', data.message);
+        console.log('WS: Data Type:', data.type)
         if (data.type === 'update') {
             setTimeout(() => {
+                console.log('Update triggered')
                 fetchRequests();
             }, 1000);
         }

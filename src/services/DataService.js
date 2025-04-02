@@ -108,10 +108,35 @@ export default {
     
             return response.data;
         } catch (e) {
-            console.error('Unable to fetch missing person data: ', e);
+            console.error('Unable to fetch missing person data:', e);
             throw e;
         }
-    },    
+    },
+
+    async fetchSingularFoundSubmissionData(parent_id, submission_id) {
+        const token = localStorage.getItem('token');
+    
+        if (submission_id === null) {
+            console.error('Returning as there\'s no submission ID specified.');
+            return {
+                error: 'Returning as there\'s no submission ID specified.'
+            };
+        }
+
+        if (parent_id === null) {
+            console.error('Returning as there\'s no submission ID specified.');
+            return {
+                error: 'Returning as there\'s no parent ID specified.'
+            };
+        }
+    
+        const response = await API.get(`/api/staff/missing-person/submissions/${parent_id}/${submission_id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    },
 
     async fetchImageData(val) {
         try {
@@ -124,6 +149,48 @@ export default {
             return imageUrl;
         } catch (e) {
             console.error('Unable to fetch or display image.');
+        }
+    },
+
+    async fetchPersonFoundSubmissions(id) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await API.get(`/api/staff/missing-person/submissions/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.data;
+        } catch (e) {
+            console.error('Unable to fetch found submissions data:', e);
+        }
+    },
+
+    async fetchRejectedPersonFoundSubmissions(id) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await API.get(`/api/staff/missing-person/submissions/rejected/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.data;
+        } catch (e) {
+            console.error('Unable to fetch rejected found submissions data:', e);
+        }
+    },
+
+    async deleteSpecificRejectedFoundSubmission(id) {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await API.delete(`/api/staff/missing-person/submissions/rejected/purge/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+            return response.data;
+        } catch (e) {
+            console.error('Unable to delete rejected found submissions data:', e);
         }
     },
 }

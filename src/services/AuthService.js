@@ -20,6 +20,7 @@ export default {
             localStorage.removeItem('token');
 
             router.push('/s/login')
+            window.location.reload();
             throw new Error("Authentication verification failed");
         }
     },

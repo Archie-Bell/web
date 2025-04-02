@@ -4,7 +4,7 @@
             <h2 class="font-bold text-2xl">Reject Submission?</h2>
             <div class="grid grid-cols-3 gap-1 pt-1">
                 <div class="p-2 border rounded-xl cols-span-1 content-center">
-                    <img :src="image_url" alt="Fetched Data Image" v-if="image_url">
+                    <img :src="image_url" class="rounded-xl" alt="Fetched Data Image" v-if="image_url">
                     <p v-else>Loading image...</p>
                 </div>
                 
