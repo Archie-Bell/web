@@ -114,6 +114,8 @@ const fetchRequests = async () => {
 // Filter requests based on the selected request type
 const filterRequests = (type) => {
     currentSubmissionPanel.value = type;
+    requestType.value = type;
+    console.log('Current Panel:', currentSubmissionPanel.value);
     if (type === 'pending') {
         filteredList.value = pendingList.value;
     } else if (type === 'approved') {
@@ -143,23 +145,16 @@ const handleSubmissionUpdates = (event) => {
     if (data.type === 'update') {
         setTimeout(() => {
             console.log('Submission Update triggered');
-            fetchRequests();
+            fetchRequests(requestType.value);
         }, 1000);
     }
 
     if (data.type === 'transaction') {
-            selectedId.value = null;
-            setTimeout(() => {
-                fetchRequests();
-            }, 1000);
+        selectedId.value = null;
+        setTimeout(() => {
+            fetchRequests(requestType.value);
+        }, 1000);
     }
-};
-
-// WebSocket logic for Active Search Updates
-const handleActiveSearchUpdates = (event) => {
-    const data = JSON.parse(event.data);
-    console.log('Active Search WS:', data.message);
-    // Handle Active Search updates here
 };
 
 // WebSocket reconnection logic
@@ -179,7 +174,7 @@ const reconnectWebSocket = (socketType) => {
 
 // WebSocket connection and message handling
 onMounted(() => {
-    fetchRequests();
+    fetchRequests(requestType.value);
     fetchStaffDetails();
 
     // WebSocket for submission updates
@@ -199,7 +194,6 @@ onMounted(() => {
 
     // WebSocket for active search updates
     socketInstanceActiveSearch.value = new WebSocket('ws://localhost:8000/ws/active-search-updates/');
-    socketInstanceActiveSearch.value.onmessage = handleActiveSearchUpdates;
     socketInstanceActiveSearch.value.onopen = () => {
         socketReconnectAttempts.value = 0;
         setInterval(() => sendHeartbeat('active-search'), 30000);

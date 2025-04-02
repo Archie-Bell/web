@@ -109,6 +109,7 @@ const updateFoundSubmission = async (submission_status) => {
             await FormService.updateFoundSubmission(data);
             console.log('Successfully approved submission. All records about this person has been deleted.');
             closeDialog();
+            location.reload();
         }
 
         if (submission_status === 'reject') {

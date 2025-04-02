@@ -72,8 +72,8 @@
                 <div v-else-if="current_tab === 2">
                     <h2 class="text-lg font-bold border-b">Found Person Submissions</h2>
                     <span>
-                        <button class="btn btn-blue mt-1" @click="fetchFoundSubmissions(idRef, 0)">Pending</button>
-                        <button class="btn btn-blue mt-1 ms-1" @click="fetchFoundSubmissions(idRef, 1)">Rejected</button>
+                        <button class="btn btn-blue mt-1" @click="fetchPendingActiveSearchSubmissions(idRef, 0)">Pending</button>
+                        <button class="btn btn-blue mt-1 ms-1" @click="fetchPendingActiveSearchSubmissions(idRef, 1)">Rejected</button>
                     </span>
                     <div class="flex-[1] p-2 mt-2 border rounded-xl min-h-[25.5rem] max-h-[25.5rem] overflow-y-auto">
                         <!-- No items message -->
@@ -153,7 +153,7 @@ import FoundSubmissionTile from './FoundSubmissionTile.vue';
 import ReviewFoundDialog from './ReviewFoundDialog.vue';
 
 // Initialize refs to store data
-const idRef = ref('');
+const idRef = ref(null);
 const name = ref('');
 const age = ref(0);
 const last_location_seen = ref('');
@@ -170,7 +170,7 @@ const foundSubmissionList = ref([]);
 
 const image_url = ref(''); // Ref to store the image URL
 
-const socketInstance = ref(null);
+const socketInstanceActiveSearch = ref(null);
 
 // Use defineProps to get the id from the parent component
 const props = defineProps({
@@ -178,8 +178,6 @@ const props = defineProps({
     submission_type: String,
     socketInstance: WebSocket,
 });
-
-socketInstance.value = props.socketInstance;
 
 // Update the idRef whenever the id prop changes
 watch(() => props.id, (newId) => {
@@ -189,7 +187,7 @@ watch(() => props.id, (newId) => {
 });
 
 // Handle tab selection
-const current_found_person_tab = ref(0);
+const current_found_person_tab = ref(null);
 const current_tab = ref(0);
 const tabSelectHandler = (val) => {
     current_tab.value = val;
@@ -197,7 +195,7 @@ const tabSelectHandler = (val) => {
 
 watch(() => current_tab.value, (newTab) => {
     if (newTab === 2 && idRef.value) {
-        fetchFoundSubmissions(idRef.value, 0);
+        fetchPendingActiveSearchSubmissions(idRef.value, 0);
     }
 });
 
@@ -312,7 +310,7 @@ const closeRejectDialog = () => {
     current_tab.value = previous_tab.value; // Restore the previous tab
 };
 
-const fetchFoundSubmissions = async (id, val) => {
+const fetchPendingActiveSearchSubmissions = async (id, val) => {
     try {
         console.log('Fetching found submissions')
         console.log('ID:', id)
@@ -320,13 +318,13 @@ const fetchFoundSubmissions = async (id, val) => {
         current_found_person_tab.value = val;
 
         if (current_found_person_tab.value === 0) {
-            const response = await DataService.fetchPersonFoundSubmissions(id);
+            const response = await DataService.fetchActiveSearchSubmissions(id);
             foundSubmissionList.value = response;
             return;
         }
 
         if (current_found_person_tab.value === 1) {
-            const response = await DataService.fetchRejectedPersonFoundSubmissions(id);
+            const response = await DataService.fetchRejectedActiveSearchSubmissions(id);
             foundSubmissionList.value = response;
             return;
         }
@@ -336,7 +334,23 @@ const fetchFoundSubmissions = async (id, val) => {
     }
 }
 
+// WebSocket logic for Active Search Updates
+const handleActiveSearchUpdates = (event) => {
+    const data = JSON.parse(event.data);
+    console.log('Active Search WS:', data.message);
+    if (data.type === 'active_search_update') {
+        if (current_found_person_tab.value === 0 || current_found_person_tab.value === 1) {
+            if (idRef.value !== null) fetchPendingActiveSearchSubmissions(idRef.value, current_found_person_tab.value)
+        }
+    }
+};
+
 onMounted(() => {
-    
+    socketInstanceActiveSearch.value = new WebSocket('ws://localhost:8000/ws/active-search-updates/');
+    socketInstanceActiveSearch.value.onmessage = handleActiveSearchUpdates;
+
+    if (current_found_person_tab.value === 0 || current_found_person_tab.value === 1) {
+            if (idRef.value !== null) fetchPendingActiveSearchSubmissions(idRef.value, current_found_person_tab.value)
+    }
 })
 </script>

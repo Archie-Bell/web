@@ -152,7 +152,7 @@ export default {
         }
     },
 
-    async fetchPersonFoundSubmissions(id) {
+    async fetchActiveSearchSubmissions(id) {
         try {
             const token = localStorage.getItem('token');
             const response = await API.get(`/api/staff/missing-person/submissions/${id}`, {
@@ -166,7 +166,7 @@ export default {
         }
     },
 
-    async fetchRejectedPersonFoundSubmissions(id) {
+    async fetchRejectedActiveSearchSubmissions(id) {
         try {
             const token = localStorage.getItem('token');
             const response = await API.get(`/api/staff/missing-person/submissions/rejected/${id}`, {
