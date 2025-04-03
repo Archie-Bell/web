@@ -1,14 +1,14 @@
 <template>
     <div class="modal-container" @click="handleClickOutside">
-        <div class="modal p-5 rounded-2xl drop-shadow-xl content-center" @click.stop>
+        <div class="modal p-5 rounded-2xl drop-shadow-xl content-center transition-opacity duration-200" @click.stop>
             <h2 class="font-bold text-2xl">Approve Submission?</h2>
             <div class="grid grid-cols-3 gap-1 pt-1">
-                <div class="p-2 border rounded-xl cols-span-1 content-center">
+                <div class="cols-span-1 content-center">
                     <img :src="image_url" class="rounded-xl" alt="Fetched Data Image" v-if="image_url">
                     <p v-else>Loading image...</p>
                 </div>
                 
-                <div class="p-2 border rounded-xl col-span-2">
+                <div class="ms-5 col-span-2">
                     <p><strong>Submission ID:</strong> {{ id }}</p>
                     <p><strong>Missing person:</strong> {{ name }}, {{ age }}</p>
                     <p><strong>Submitted by:</strong> {{ reporter_legal_name }}</p>
@@ -16,9 +16,9 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-1 content-center pt-1">
-              <button @click="approveSubmission(props.id)" class="btn btn-green col-span-1">Approve</button>
-              <button @click="closeDialog" class="btn btn-red col-span-1">Cancel</button>
+            <div class="grid grid-cols-2 gap-10 content-center pt-5">
+              <button @click="approveSubmission(props.id)" class="hover:bg-green-500 hover:bg-opacity-50 col-span-1 transition-colors duration-200">Approve</button>
+              <button @click="closeDialog" class="hover:bg-opacity-50 col-span-1 transition-colors duration-200">Cancel</button>
             </div>
         </div>
     </div>
@@ -82,20 +82,6 @@ const props = defineProps({
     background-color: rgba(0, 0, 0, 0.5); /* Optional background overlay */
     backdrop-filter: blur(5px);
     z-index: 999;
-}
-
-.modal {
-    background-color: white;
-    width: 500px;
-    max-height: 80vh;
-    overflow-y: auto;
-    border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    position: relative;
 }
 
 .grid {

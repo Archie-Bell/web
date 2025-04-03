@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref } from "vue";
 import FormService from "@/services/FormService";
-import { RouterLink } from "vue-router";
+import router from "@/router/index.js";
 
 const name = ref("Test");
 const age = ref(18);
@@ -89,9 +89,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-2 grid content-end place-items-end">
-        <RouterLink class="btn btn-blue" to="/s/admin-panel">ADMIN PANEL</RouterLink>
-    </div>
+    <button class="absolute top-5 right-5 min-w-[10rem]" @click="router.push('/s/admin-panel')">Admin Panel</button>
 
     <div class="p-10 grid content-center place-items-center h-screen">
         <h1 class="font-bold uppercase text-3xl">Archie Bell</h1>

@@ -4,25 +4,25 @@
             <!-- Header Section -->
             <header class="text-start mb-5">
                 <h1 class="font-bold uppercase text-3xl">Admin Panel</h1>
-                <div class="flex gap-1 justify-start mt-4">
+                <div class="flex gap-3 justify-start mt-4">
                     <!-- Buttons to filter different submission statuses -->
-                    <button @click="filterRequests('pending')" class="btn btn-blue uppercase">Pending</button>
-                    <button @click="filterRequests('approved')" class="btn btn-blue uppercase">Approved</button>
-                    <button @click="filterRequests('rejected')" class="btn btn-blue uppercase">Rejected</button>
-                    <button @click="logout" class="btn btn-red uppercase">Logout</button>
+                    <button @click="filterRequests('pending')" class="uppercase min-w-[10rem]">Pending</button>
+                    <button @click="filterRequests('approved')" class="uppercase min-w-[10rem]">Approved</button>
+                    <button @click="filterRequests('rejected')" class="uppercase min-w-[10rem]">Rejected</button>
+                    <button @click="logout" class="uppercase hover:bg-red-500 hover:bg-opacity-50 ml-auto">Logout</button>
                 </div>
             </header>
 
             <!-- Main Content Section -->
-            <h2 class="text-xl font-bold">
+            <h2 class="text-xl font-bold border-b">
                 {{ currentSubmissionPanel === 'pending' ? 'Pending Submissions' : currentSubmissionPanel === 'approved' ? 'Approved Submissions' : 'Rejected Submissions' }}
             </h2>
             <div class="flex mt-5 w-full h-[600px]">
                 <!-- Left Panel -->
-                <div class="pe-5 flex-[1] pt-3 overflow-y-auto flex flex-col rounded-xl border p-2" style="max-height: 600px; flex-grow: 1">
+                <div class="pe-5 flex-[1] pt-3 overflow-y-auto flex flex-col border-r p-2 hide-scrollbar" style="max-height: 600px; flex-grow: 1">
                     <div class="" style="min-height: 558px; max-height: 558px;">
                         <!-- No items message -->
-                        <div v-if="filteredList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
+                        <div v-if="filteredList.length === 0" class="flex justify-center items-center text-center h-full">
                             No requests available.
                         </div>
 
@@ -63,7 +63,7 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import FormRequestTile from "@/components/FormRequestTile.vue";
 import RequestDetails from "@/components/RequestDetails.vue";
-import ActiveSearchesDialog from "@/components/ReviewFoundDialog.vue";
+import ActiveSearchesDialog from "@/components/ActiveSearchDialog.vue";
 import DataService from "@/services/DataService";
 import GetTimeSinceSubmission from "@/scripts/GetTimeSinceSubmission.js";
 import AuthService from "@/services/AuthService";
@@ -114,7 +114,7 @@ const fetchRequests = async () => {
 // Filter requests based on the selected request type
 const filterRequests = (type) => {
     currentSubmissionPanel.value = type;
-    requestType.value = type;
+    // requestType.value = type;
     console.log('Current Panel:', currentSubmissionPanel.value);
     if (type === 'pending') {
         filteredList.value = pendingList.value;

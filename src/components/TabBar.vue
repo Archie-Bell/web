@@ -1,13 +1,13 @@
 <template>
-    <div class="flex gap-1">
+    <div class="flex gap-2">
         <button 
             @click="selectedTab(0)" 
             :disabled="disabled"
             :class="{
-                'bg-blue-500 text-white hover:bg-blue-400': !disabled,
-                'bg-gray-300 text-gray-500 cursor-not-allowed': disabled
+                'hover:bg-opacity-40': !disabled,
+                'bg-gray-600 text-gray-300 bg-opacity-50 cursor-not-allowed outline-gray-300': disabled
             }"
-            class="px-4 py-2 rounded-md transition-colors duration-200 font-bold"
+            class="px-4 py-2"
         >
             Overview
         </button>
@@ -15,10 +15,10 @@
             @click="selectedTab(1)" 
             :disabled="disabled"
             :class="{
-                'bg-blue-500 text-white hover:bg-blue-400': !disabled,
-                'bg-gray-300 text-gray-500 cursor-not-allowed': disabled
+                'hover:bg-opacity-40': !disabled,
+                'bg-gray-600 text-gray-300 bg-opacity-50 cursor-not-allowed outline-gray-300': disabled
             }"
-            class="px-4 py-2 rounded-md transition-colors duration-200 font-bold"
+            class="px-4 py-2"
         >
             Contact
         </button>
@@ -29,10 +29,10 @@
             @click="openApproveDialog" 
             :disabled="disabled"
             :class="{
-                'bg-green-500 text-white hover:bg-green-400': !disabled,
-                'bg-gray-300 text-gray-500 cursor-not-allowed': disabled
+                'backdrop-blur-[10px] hover:bg-opacity-50 hover:bg-green-500': !disabled,
+                'bg-gray-600 text-gray-300 bg-opacity-50 cursor-not-allowed outline-gray-300': disabled
             }"
-            class="px-4 py-2 rounded-md transition-colors duration-200 font-bold"
+            class="px-4 py-2"
         >
             Approve
         </button>
@@ -41,10 +41,10 @@
             @click="openRejectDialog" 
             :disabled="disabled"
             :class="{
-                'bg-red-500 text-white hover:bg-red-400': !disabled,
-                'bg-gray-300 text-gray-500 cursor-not-allowed': disabled
+                'backdrop-blur-[10px] hover:bg-opacity-50 hover:bg-red-500': !disabled,
+                'bg-gray-600 text-gray-300 bg-opacity-50 cursor-not-allowed outline-gray-300': disabled
             }"
-            class="px-4 py-2 rounded-md transition-colors duration-200 font-bold"
+            class="px-4 py-2"
         >
             Reject
         </button>
@@ -54,10 +54,10 @@
             :disabled="disabled"
             @click="selectedTab(2)"
             :class="{
-                'bg-blue-500 text-white hover:bg-blue-400': !disabled,
-                'bg-gray-300 text-gray-500 cursor-not-allowed': disabled
+                'hover:bg-opacity-40': !disabled,
+                'bg-gray-600 text-gray-300 bg-opacity-50 cursor-not-allowed outline-gray-300': disabled
             }"
-            class="px-4 py-2 rounded-md transition-colors duration-200 font-bold"
+            class="px-4 py-2"
         >
             Submissions
         </button>

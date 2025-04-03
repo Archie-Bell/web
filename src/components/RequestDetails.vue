@@ -7,28 +7,28 @@
             @selected-tab="tabSelectHandler" 
             @open-approve-dialog="openApproveDialog" 
             @open-reject-dialog="openRejectDialog" 
-            class="pb-5"
+            class="py-3"
             :disabled="!idRef"
             :form-status="submission_type"
         />
         
-        <div class="border rounded-xl p-2" style="min-height: 507px; height: 40vh">
-            <div v-if="!idRef" class="flex items-center justify-center h-full text-gray-500">
+        <div class="border-t" style="min-height: 507px; height: 40vh">
+            <div v-if="!idRef" class="flex items-center justify-center h-full">
                 <p>Select a form to view its details.</p>
             </div>
     
             <div v-else>
                 <!-- Overview Tab -->
                 <div v-if="current_tab === 0">
-                    <div class="grid grid-cols-3 gap-6">
-                        <div v-if="form_status === 'Pending' || form_status === 'Approved'" class="p-4 border rounded-xl content-center">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div v-if="form_status === 'Pending' || form_status === 'Approved'" class="p-4 content-center col-span-1">
                             <!-- Using the ref for the image URL directly -->
-                            <img :src="image_url" class="rounded-xl" alt="Fetched Data Image" v-if="image_url" />
+                            <img :src="image_url" class="" alt="Fetched Data Image" v-if="image_url" />
                             <p v-else>Loading image...</p>
                         </div>
 
                         <!-- Conditionally apply col-span based on form_status -->
-                        <div :class="form_status === 'Rejected' ? 'p-4 col-span-3 border rounded-xl min-h-[30.6rem] max-h-[30.6rem] flex flex-col justify-between' : 'p-4 col-span-2 border rounded-xl min-h-[30.6rem] max-h-[30.6rem] flex flex-col justify-between'">
+                        <div :class="form_status === 'Rejected' ? 'p-4 col-span-1 rounded-xl min-h-[30.6rem] max-h-[30.6rem] flex flex-col justify-between' : 'p-4 col-span-1 min-h-[30.6rem] max-h-[30.6rem] flex flex-col justify-center'">
                             <p class="text-lg"><strong>{{ form_status !== 'Rejected' ? 'Name' : 'Reported missing person' }}:</strong> {{ name }}</p>
                             <p class="text-lg" v-if="form_status !== 'Rejected'"><strong>Age:</strong> {{ age }}</p>
                             <p class="text-lg"><strong>{{ form_status !== 'Rejected' ? 'Last known location' : 'Reported missing location' }}:</strong> {{ last_location_seen }}</p>
@@ -47,8 +47,8 @@
     
                 <!-- Contact Tab -->
                 <div v-else-if="current_tab === 1">
-                    <div class="p-2 border rounded-xl min-h-[12.1rem]">
-                        <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Missing Person Details</strong></p>
+                    <div class="pt-3 min-h-[12.1rem]">
+                        <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow bg-white bg-opacity-30 backdrop-blur-[20px]"><strong>Missing Person Details</strong></p>
                         <p class="text-m">- <strong>{{ form_status !== 'Rejected' ? 'Name & age' : 'Reported missing person'}}:</strong> {{ form_status !== 'Rejected' ? `${name}, ${age}` : name }}</p>
                         <p class="text-m">- <strong>{{ form_status !== 'Rejected' ? 'Last location & date' : 'Reported missing location'}}:</strong> {{ form_status !== 'Rejected' ? `${last_location_seen} (${last_date_time_seen})` : last_location_seen }}</p>
                         <p class="text-m" v-if="form_status === 'Rejected'">- <strong>Reported date/time missing:</strong> {{ last_date_time_seen }}</p>
@@ -56,8 +56,8 @@
                         <p v-if="form_status === 'Rejected' ">- <strong>Last updated date:</strong> {{ last_updated_date }}</p>
                         <p class="text-m break-all">{{ additional_info }}</p>
                     </div>
-                    <div class="p-2 mt-2 border rounded-xl min-h-[18rem]">
-                        <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow"><strong>Reporter Information</strong></p>
+                    <div class="pt-3 min-h-[18rem]">
+                        <p class="text-lg p-2 mb-2 border rounded-xl drop-shadow bg-white bg-opacity-30 backdrop-blur-[20px]"><strong>Reporter Information</strong></p>
                         <p class="text-m">- <strong>Reporter's legal name:</strong> {{ reporter_legal_name }}</p>
                         <p class="text-m">- <strong>Reporter's phone number:</strong> {{ reporter_phone_number }}</p>
                         <p class="text-m">- <strong>Reporter's location:</strong> {{ last_location_seen }}</p>
@@ -70,27 +70,37 @@
                 </div>
 
                 <div v-else-if="current_tab === 2">
-                    <h2 class="text-lg font-bold border-b">Found Person Submissions</h2>
+                    <h2 class="text-lg font-bold mt-2">Found Person Submissions</h2>
                     <span>
-                        <button class="btn btn-blue mt-1" @click="fetchPendingActiveSearchSubmissions(idRef, 0)">Pending</button>
-                        <button class="btn btn-blue mt-1 ms-1" @click="fetchPendingActiveSearchSubmissions(idRef, 1)">Rejected</button>
+                        <button class="mt-1 min-w-[10rem]" @click="fetchPendingActiveSearchSubmissions(idRef, 0)">Pending</button>
+                        <button class="mt-1 ms-3 min-w-[10rem]" @click="fetchPendingActiveSearchSubmissions(idRef, 1)">Rejected</button>
                     </span>
-                    <div class="flex-[1] p-2 mt-2 border rounded-xl min-h-[25.5rem] max-h-[25.5rem] overflow-y-auto">
+                    <div class="flex-[1] flex flex-col py-2 px-[0.2rem] mt-2 min-h-[25rem] max-h-[25rem] overflow-y-auto hide-scrollbar">
                         <!-- No items message -->
-                        <div v-if="foundSubmissionList.length === 0" class="flex justify-center items-center text-center text-gray-500 h-full">
-                            No requests available.
+                        <div v-if="foundSubmissionList.length === 0" class="flex justify-center items-center text-center min-h-[390px]">
+                            <p>No requests available.</p>
                         </div>
 
                         <!-- Displaying filtered list of submissions -->
                         <div v-else class="flex flex-col">
                             <div v-for="(data, index) in foundSubmissionList" :key="index">
-                                <FoundSubmissionTile
+                                <FoundSubmissionTile v-if="data.submission_status === 'Pending'"
                                     class="rounded-xl"
                                     :index="index + 1"
                                     :id="data._id"
                                     :submission_status="data.submission_status"
                                     :time_since_submission="GetTimeSinceSubmission.getTimeSinceSubmission(data.last_updated_date)"
+                                    @open-review-dialog="openReviewDialog($event)"
+                                />
+
+                                <FoundSubmissionTile v-else
+                                    class="rounded-xl min-h-[230px]"
+                                    :index="index + 1"
+                                    :id="data._id"
+                                    :submission_status="data.submission_status"
+                                    :time_since_submission="GetTimeSinceSubmission.getTimeSinceSubmission(data.last_updated_date)"
                                     :rejection_reason="data.rejection_reason"
+                                    :updated_by="data.updated_by"
                                     @open-review-dialog="openReviewDialog($event)"
                                 />
                             </div>
@@ -149,8 +159,8 @@ import DataService from '@/services/DataService.js';
 import GetTimeSinceSubmission from '@/scripts/GetTimeSinceSubmission.js';
 import ApproveDialog from './ApproveDialog.vue';
 import RejectDialog from './RejectDialog.vue';
-import FoundSubmissionTile from './FoundSubmissionTile.vue';
-import ReviewFoundDialog from './ReviewFoundDialog.vue';
+import FoundSubmissionTile from './ActiveSearchTile.vue';
+import ReviewFoundDialog from './ActiveSearchDialog.vue';
 
 // Initialize refs to store data
 const idRef = ref(null);

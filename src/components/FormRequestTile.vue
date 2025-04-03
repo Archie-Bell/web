@@ -1,14 +1,13 @@
 <template>
-    <div class="form-request-tile">
+    <div class="request-tile cursor-pointer hover:bg-gray-700 hover:bg-opacity-40">
         <h3>{{ age ? `${name}, ${age}` : `${name}`}}</h3>
         <p>Submitted by {{ reporter_legal_name }} {{ time_since_submission }}.</p>
-        <p>{{ 'Submission ID: ' + id || 'ID not recognised.' }}</p>
+        <p><strong>Submission ID:</strong> {{ id }}</p>
     </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-const fetchedId = ref('');
 
 const props = defineProps({
     id: String,
@@ -20,17 +19,6 @@ const props = defineProps({
 </script>
 
 <style scoped>
-.form-request-tile {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    max-height: 150px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
 h3 {
     margin: 0;
     font-size: 1.2em;
@@ -40,6 +28,5 @@ h3 {
 p {
     margin: 5px 0;
     font-size: 0.9em;
-    color: #666;
 }
 </style>

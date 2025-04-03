@@ -21,3 +21,22 @@
 .btn-green:hover {
     @apply bg-green-700 text-white;
 }
+
+.modal {
+    @apply bg-white bg-opacity-30 backdrop-blur-[20px] w-[500px] max-h-[80vh] overflow-y-auto rounded-3xl p-[20px] outline outline-2 flex flex-col justify-between relative
+}
+
+.request-tile {
+    @apply border p-[10px] mb-[10px] max-h-[150px] overflow-y-auto flex flex-col bg-gray-300 bg-opacity-30 backdrop-blur-[30px] outline outline-2 drop-shadow-lg transition-colors duration-200 hover:backdrop-blur-[30px];
+}
+
+
+.hide-scrollbar {
+    -ms-overflow-style: none;   
+    scrollbar-width: none;      
+}
+  
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;            
+}
+  

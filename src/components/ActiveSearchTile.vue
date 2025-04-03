@@ -1,20 +1,22 @@
 <template>
-    <div class="found-submission-tile relative p-4 border rounded-lg">
+    <div class="request-tile cursor-default">
         <h3 class="font-bold"> {{ submission_status === 'Pending' ? 'Pending Submission' : 'Rejected Submission' }} {{ index }}</h3>
         <p>{{ submission_status === 'Pending' ? 'Submitted' : 'Updated' }} {{ time_since_submission }}.</p>
-        <p>Submission status: {{ submission_status }}</p>
+        <p><strong>Submission status:</strong> {{ submission_status }}</p>
         <div v-if="submission_status === 'Rejected'">
-            <p>Rejection reason:</p>
+            <p class="font-bold">Rejection reason:</p>
             <p class="break-all max-w-[30rem]">- {{ rejection_reason }}</p>
         </div>
-        <p>{{ 'Submission ID: ' + id || 'ID not recognised.' }}</p>
+        <p v-if="submission_status === 'Rejected'" class="absolute bottom-0 left-0 ps-[0.6rem] pb-1"><strong>Submission ID:</strong> {{ id }}</p>
+        <p v-if="updated_by !== null"><strong>Updated by:</strong> {{ updated_by }}</p>
+        <p v-else><strong>Submission ID:</strong> {{ id }}</p>
 
         <!-- Button positioned at the bottom right -->
-        <button v-if="submission_status === 'Pending'" class="absolute bottom-4 right-4 px-4 py-2 btn btn-blue" @click="openReviewDialog">
+        <button v-if="submission_status === 'Pending'" class="absolute bottom-4 right-4 px-4 py-2 bg-black bg-opacity-30" @click="openReviewDialog">
             Review
         </button>
 
-        <button v-else class="absolute bottom-4 right-4 px-4 py-2 btn btn-red" @click="deleteRejectedSubmission(id)">
+        <button v-else class="absolute bottom-4 right-4 px-4 py-2 bg-black bg-opacity-30 hover:bg-red-500 hover:bg-opacity-50" @click="deleteRejectedSubmission(id)">
             Delete
         </button>
     </div>
@@ -31,6 +33,7 @@ const props = defineProps({
     submission_status: String,
     time_since_submission: String,
     rejection_reason: String,
+    updated_by: String,
 });
 
 const openReviewDialog = () => {
@@ -46,17 +49,6 @@ const deleteRejectedSubmission = async (id) => {
 </script>
 
 <style scoped>
-.found-submission-tile {
-    border: 1px solid #ccc;
-    padding: 10px;
-    margin-bottom: 10px;
-    cursor: pointer;
-    max-height: auto;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-}
-
 h3 {
     margin: 0;
     font-size: 1.2em;
@@ -66,6 +58,5 @@ h3 {
 p {
     margin: 5px 0;
     font-size: 0.9em;
-    color: #666;
 }
 </style>

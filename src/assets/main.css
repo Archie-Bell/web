@@ -1,3 +1,36 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    body {
+        @apply bg-main;
+        height: 100vh;
+        margin: 0;
+        color: white;
+    }
+
+    button {
+        @apply text-white backdrop-blur-[30px] outline outline-[3px] rounded-full bg-white font-bold min-w-[7rem] min-h-[3rem] bg-opacity-20 hover:bg-opacity-50 drop-shadow-xl h-10 transition-colors duration-200;
+    }
+
+    textarea, input {
+        @apply text-white bg-black bg-opacity-30 backdrop-blur-[20px] drop-shadow-lg appearance-none
+    }
+
+    input {
+        @apply min-h-10 px-3 py-2 rounded-xl border appearance-none
+    }
+
+    img {
+        @apply rounded-xl drop-shadow-lg
+    }
+
+    h1, h2, h3, p {
+        @apply drop-shadow-xl
+    }
+
+    h1, h2, h3 {
+        @apply font-bold
+    }
+}

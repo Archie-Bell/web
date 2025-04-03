@@ -1,16 +1,19 @@
 <template>
+    <button class="absolute top-5 left-5 hover:bg-red-500 hover:bg-opacity-50" @click="router.push('/')">Back</button>
     <div class="grid content-center place-items-center h-screen">
-    <h1 class="text-3xl">Welcome Back</h1>
+      
+    <div class="pt-5">
+      <h1 class="text-3xl uppercase">Admin Panel</h1>
+      <label class="block content-center font-bold mb-1 md:mb-0 pr-4 pt-5" for="email">Email</label>
+      <input type="email" name="email" id="email" v-model="email" placeholder="john@appleseed.com" />
 
-    <div class="py-5">
-      <label class="block content-center font-bold mb-1 md:mb-0 pr-4" for="email">Email</label>
-      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="email" name="email" id="email" v-model="email" placeholder="john@appleseed.com" />
-
-      <label class="block content-center font-bold mb-1 md:mb-0 pr-4" for="password">Password</label>
-      <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="password" name="password" id="password" v-model="password" placeholder="Enter your password"/>
+      <label class="block content-center font-bold mb-1 md:mb-0 pr-4 pt-3" for="password">Password</label>
+      <input type="password" name="password" id="password" v-model="password" placeholder="Enter your password"/>
     </div>
 
-    <button class="place-self-center btn btn-blue" @click="login">LOGIN</button>
+    <p v-if="error_response" class="text-red-500 font-bold absolute bottom-20 bg-red-300 bg-opacity-30 backdrop-blur-[20px] px-5 py-2 rounded-full outline outline-4 outline-red-500">{{ error_response }}</p>
+
+    <button class="place-self-center mt-5 min-w-[10rem]" @click="login">LOGIN</button>
   </div>
 </template>
 
@@ -21,6 +24,7 @@ import router from "@/router/index.js";
 
 const email = ref('');
 const password = ref('');
+const error_response = ref(null);
 
 const login = async () => {
   console.log('Authenticating user...');
@@ -34,6 +38,7 @@ const login = async () => {
     localStorage.setItem('token', response.data.token);
     await router.push('/s/admin-panel');
   } catch (e) {
+    error_response.value = 'Invalid credentials.'
     console.error('Authentication failed: ', e);
   }
 }
