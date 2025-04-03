@@ -27,7 +27,7 @@
             
             <div class="mt-1">
                 <label for="rejection_reason" class="font-bold">Reason (reject submission):</label><br/>
-                <p v-if="update_error" class="pt-1 text-red-500 font-bold bg-red-300 bg-opacity-30 backdrop-blur-[30px] rounded-full px-3 my-2">{{ update_error }}</p>
+                <p v-if="update_error" class="text-red-500 font-bold bg-red-300 bg-opacity-30 backdrop-blur-[30px] rounded-full px-3 my-2">{{ update_error }}</p>
                 <textarea name="rejection_reason" v-model="rejection_reason" id="rejection_reason" class="w-full border rounded-xl p-2 mt-1 resize-none" rows="3" wrap="hard" maxlength="125" placeholder="Maximum 125 characters and minimum 20 characters allowed."></textarea>
             </div>
 

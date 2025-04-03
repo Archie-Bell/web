@@ -6,9 +6,9 @@
         <div v-if="submission_status === 'Rejected'">
             <p class="font-bold">Rejection reason:</p>
             <p class="break-all max-w-[30rem]">- {{ rejection_reason }}</p>
+            <p class="absolute bottom-0 left-0 ps-[0.6rem] pb-1"><strong>Submission ID:</strong> {{ id }}</p>
+            <p><strong>Updated by:</strong> {{ updated_by }}</p>
         </div>
-        <p v-if="submission_status === 'Rejected'" class="absolute bottom-0 left-0 ps-[0.6rem] pb-1"><strong>Submission ID:</strong> {{ id }}</p>
-        <p v-if="updated_by !== null"><strong>Updated by:</strong> {{ updated_by }}</p>
         <p v-else><strong>Submission ID:</strong> {{ id }}</p>
 
         <!-- Button positioned at the bottom right -->
