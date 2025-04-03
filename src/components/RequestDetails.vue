@@ -348,7 +348,7 @@ const fetchPendingActiveSearchSubmissions = async (id, val) => {
 const handleActiveSearchUpdates = (event) => {
     const data = JSON.parse(event.data);
     console.log('Active Search WS:', data.message);
-    if (data.type === 'active_search_update') {
+    if (data.type === 'active_search_update' && data.message !== null) {
         if (current_found_person_tab.value === 0 || current_found_person_tab.value === 1) {
             if (idRef.value !== null) fetchPendingActiveSearchSubmissions(idRef.value, current_found_person_tab.value)
         }
@@ -356,11 +356,17 @@ const handleActiveSearchUpdates = (event) => {
 };
 
 onMounted(() => {
-    socketInstanceActiveSearch.value = new WebSocket('ws://localhost:8000/ws/active-search-updates/');
-    socketInstanceActiveSearch.value.onmessage = handleActiveSearchUpdates;
+    // Use setTimeout to delay the WebSocket connection and message handling
+    setTimeout(() => {
+        socketInstanceActiveSearch.value = new WebSocket('ws://capable-namely-crane.ngrok-free.app/ws/active-search-updates/');
+        socketInstanceActiveSearch.value.onmessage = handleActiveSearchUpdates;
 
-    if (current_found_person_tab.value === 0 || current_found_person_tab.value === 1) {
-            if (idRef.value !== null) fetchPendingActiveSearchSubmissions(idRef.value, current_found_person_tab.value)
-    }
-})
+        if (current_found_person_tab.value === 0 || current_found_person_tab.value === 1) {
+            if (idRef.value !== null) {
+                fetchPendingActiveSearchSubmissions(idRef.value, current_found_person_tab.value);
+            }
+        }
+    }, 1500); // Delay WebSocket connection by 1500ms
+});
+
 </script>

@@ -1,9 +1,10 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: 'http://localhost:8000',
+    baseURL: 'https://capable-namely-crane.ngrok-free.app/',
     headers: {
         'Access-Control-Allow-Origin': '*',
+        'ngrok-skip-browser-warning': '59'
     },
 });
 

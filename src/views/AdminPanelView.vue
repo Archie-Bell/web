@@ -142,14 +142,14 @@ const fetchStaffDetails = async () => {
 const handleSubmissionUpdates = (event) => {
     const data = JSON.parse(event.data);
     console.log('Submission WS:', data.message);
-    if (data.type === 'update') {
+    if (data.type === 'update' && data.message !== null) {
         setTimeout(() => {
             console.log('Submission Update triggered');
             fetchRequests(requestType.value);
         }, 1000);
     }
 
-    if (data.type === 'transaction') {
+    if (data.type === 'transaction' && data.message !== null) {
         selectedId.value = null;
         setTimeout(() => {
             fetchRequests(requestType.value);
@@ -172,40 +172,44 @@ const reconnectWebSocket = (socketType) => {
     }
 };
 
-// WebSocket connection and message handling
 onMounted(() => {
+    // Fetch initial data right away
     fetchRequests(requestType.value);
     fetchStaffDetails();
 
-    // WebSocket for submission updates
-    socketInstanceSubmission.value = new WebSocket('ws://localhost:8000/ws/submission-updates/');
-    socketInstanceSubmission.value.onmessage = handleSubmissionUpdates;
-    socketInstanceSubmission.value.onopen = () => {
-        socketReconnectAttempts.value = 0;
-        setInterval(() => sendHeartbeat('submission'), 30000);
-    };
-    socketInstanceSubmission.value.onclose = () => {
-        reconnectWebSocket('submission');
-    };
-    socketInstanceSubmission.value.onerror = (error) => {
-        console.error('Submission WebSocket error:', error);
-        socketInstanceSubmission.value.close();
-    };
+    // Use setTimeout to delay the WebSocket connection and message handling
+    setTimeout(() => {
+        // WebSocket for submission updates
+        socketInstanceSubmission.value = new WebSocket('ws://capable-namely-crane.ngrok-free.app/ws/submission-updates/');
+        socketInstanceSubmission.value.onmessage = handleSubmissionUpdates;
+        socketInstanceSubmission.value.onopen = () => {
+            socketReconnectAttempts.value = 0;
+            setInterval(() => sendHeartbeat('submission'), 30000);
+        };
+        socketInstanceSubmission.value.onclose = () => {
+            reconnectWebSocket('submission');
+        };
+        socketInstanceSubmission.value.onerror = (error) => {
+            console.error('Submission WebSocket error:', error);
+            socketInstanceSubmission.value.close();
+        };
 
-    // WebSocket for active search updates
-    socketInstanceActiveSearch.value = new WebSocket('ws://localhost:8000/ws/active-search-updates/');
-    socketInstanceActiveSearch.value.onopen = () => {
-        socketReconnectAttempts.value = 0;
-        setInterval(() => sendHeartbeat('active-search'), 30000);
-    };
-    socketInstanceActiveSearch.value.onclose = () => {
-        reconnectWebSocket('active-search');
-    };
-    socketInstanceActiveSearch.value.onerror = (error) => {
-        console.error('Active Search WebSocket error:', error);
-        socketInstanceActiveSearch.value.close();
-    };
+        // WebSocket for active search updates
+        socketInstanceActiveSearch.value = new WebSocket('ws://capable-namely-crane.ngrok-free.app/ws/active-search-updates/');
+        socketInstanceActiveSearch.value.onopen = () => {
+            socketReconnectAttempts.value = 0;
+            setInterval(() => sendHeartbeat('active-search'), 30000);
+        };
+        socketInstanceActiveSearch.value.onclose = () => {
+            reconnectWebSocket('active-search');
+        };
+        socketInstanceActiveSearch.value.onerror = (error) => {
+            console.error('Active Search WebSocket error:', error);
+            socketInstanceActiveSearch.value.close();
+        };
+    }, 1500); // Delay WebSocket connections by 1500ms
 });
+
 
 // Send heartbeat to keep both WebSocket connections alive
 const sendHeartbeat = (socketType) => {

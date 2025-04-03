@@ -55,10 +55,11 @@ const provided_info = ref(null);
 const submission_status = ref(null);
 const submission_date = ref(null);
 const last_updated_date = ref(null);
-const updated_by = ref(null);
 const rejection_reason = ref(null);
 const action_confirm = ref(0);
 const temp = ref(null);
+
+const raw_image_url = ref(null);
 
 const update_error = ref(null);
 
@@ -104,12 +105,16 @@ const updateFoundSubmission = async (submission_status) => {
                 'submission_id': props.id,
                 'parent_id': props.parent_id,
                 'submission_status': 'approved',
+                'image_url': raw_image_url.value
             }
 
             await FormService.updateFoundSubmission(data);
             console.log('Successfully approved submission. All records about this person has been deleted.');
             closeDialog();
-            location.reload();
+            
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
         }
 
         if (submission_status === 'reject') {
@@ -136,18 +141,19 @@ const updateFoundSubmission = async (submission_status) => {
                 'submission_status': 'rejected',
                 'rejection_reason': rejection_reason.value,
                 'submission_date': submission_date.value,
-                'last_updated_date': last_updated_date.value
+                'last_updated_date': last_updated_date.value,
+                'image_url': raw_image_url.value
             }
     
             await FormService.updateFoundSubmission(data);
-            console.log('Successfully rejected proposed found submission ID:', props.id);
             closeDialog();
+            console.log('Successfully rejected proposed found submission ID:', props.id);
         }
     }
 
     catch (e) {
         console.error('Something went wrong:', e);
-        update_error.value('Something went wrong.');
+        update_error.value = 'Something went wrong.';
         action_confirm.value = 0;
     }
 };
@@ -179,6 +185,7 @@ const fetchSelectedDataContents = async (parent_id, id) => {
         last_updated_date.value = GetTimeSinceSubmission.formatDateOfSubmission(response.last_updated_date);
         
         // Set the image URL (this part remains common)
+        raw_image_url.value = response.image_url;
         image_url.value = await fetchImageData(response.image_url, submission_status.value);
     } catch (e) {
         console.error('Failed to fetch specified data:', e);
