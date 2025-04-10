@@ -12,6 +12,8 @@ const image = ref(null);
 const image_uri = ref(null);
 const reporter_legal_name = ref("");
 const reporter_phone_number = ref("");
+const success_message = ref(null);
+const error_message = ref(null);
 
 const submit = async () => {
     console.log("Submitting form...");
@@ -33,8 +35,10 @@ const submit = async () => {
 
         await FormService.submitForm(formData);
         console.log("Form submitted successfully");
+        success_message.value = "Your form has been submitted successfully.";
     } catch (e) {
         console.error("Form submission failed: ", e);
+        error_message.value = "Your submission has failed, ensure all fields are not empty.";
     }
 };
 
@@ -247,7 +251,10 @@ onMounted(() => {
                 ></textarea>
             </div>
             
+            <p v-if="success_message" class="text-green-500 text-center font-bold bg-green-300 bg-opacity-30 backdrop-blur-[30px] rounded-full px-3 my-2">{{ success_message }}</p>
+            <p v-if="error_message" class="text-red-500 text-center font-bold bg-red-300 bg-opacity-30 backdrop-blur-[30px] rounded-full px-3 my-2">{{ error_message }}</p>
             <div class="flex justify-center py-4">
+
                 <button @click="submit" class="min-w-[10rem]">
                     SUBMIT FORM
                 </button>
