@@ -246,7 +246,7 @@ onMounted(() => {
                     rows="5"
                     wrap="hard"
                     maxlength="200"
-                    class="border rounded-lg p-2 w-full resize-none"
+                    class="border rounded-lg p-2 w-[50.2rem] resize-none"
                     placeholder="Add extra information about this person here. (optional)"
                 ></textarea>
             </div>
