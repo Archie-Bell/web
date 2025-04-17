@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const API = axios.create({
-    baseURL: 'https://capable-namely-crane.ngrok-free.app/',
+    baseURL: import.meta.env.VITE_API_URL,
     headers: {
         'Access-Control-Allow-Origin': '*',
-        'ngrok-skip-browser-warning': '59'
+        'ngrok-skip-browser-warning': '3707'
     },
 });
 

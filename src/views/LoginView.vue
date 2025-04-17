@@ -27,14 +27,14 @@ const password = ref('');
 const error_response = ref(null);
 
 const login = async () => {
-  console.log('Authenticating user...');
+  console.log('Authenticating user', email.value);
   try {
     const response = await AuthService.login({
       email: email.value,
       password: password.value,
     });
 
-    console.log(response.data.token);
+    console.log('Bearer', response.data.token);
     localStorage.setItem('token', response.data.token);
     await router.push('/s/admin-panel');
   } catch (e) {
